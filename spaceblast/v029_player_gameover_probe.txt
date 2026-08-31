@@ -1,0 +1,509 @@
+------------------------------------------------------
+Loading rom: space-blast-v029.nes
+File CRC32: 0x87FE74B4
+------------------------------------------------------
+[DB] Initialized - 10655 games in DB
+PRG CRC32: 0xAE47E0F6
+PRG+CHR CRC32: 0xAE47E0F6
+[iNes] Mapper: 30 Sub: 0
+[iNes] PRG ROM: 512 KB
+[iNes] CHR ROM: 0 KB
+[iNes] CHR RAM: 8 KB
+[iNes] Mirroring: Horizontal
+[iNes] Battery: Yes
+[DB] Game not found in database
+[CPU] Uninitialized memory read: $0201
+[CPU] Uninitialized memory read: $0202
+[CPU] Uninitialized memory read: $0203
+[CPU] Uninitialized memory read: $0205
+[CPU] Uninitialized memory read: $0206
+[CPU] Uninitialized memory read: $0207
+[CPU] Uninitialized memory read: $0209
+[CPU] Uninitialized memory read: $020A
+[CPU] Uninitialized memory read: $020B
+[CPU] Uninitialized memory read: $020D
+[CPU] Uninitialized memory read: $020E
+[CPU] Uninitialized memory read: $020F
+[CPU] Uninitialized memory read: $0211
+[CPU] Uninitialized memory read: $0212
+[CPU] Uninitialized memory read: $0213
+[CPU] Uninitialized memory read: $0215
+[CPU] Uninitialized memory read: $0216
+[CPU] Uninitialized memory read: $0217
+[CPU] Uninitialized memory read: $0219
+[CPU] Uninitialized memory read: $021A
+[CPU] Uninitialized memory read: $021B
+[CPU] Uninitialized memory read: $021D
+[CPU] Uninitialized memory read: $021E
+[CPU] Uninitialized memory read: $021F
+[CPU] Uninitialized memory read: $0221
+[CPU] Uninitialized memory read: $0222
+[CPU] Uninitialized memory read: $0223
+[CPU] Uninitialized memory read: $0225
+[CPU] Uninitialized memory read: $0226
+[CPU] Uninitialized memory read: $0227
+[CPU] Uninitialized memory read: $0229
+[CPU] Uninitialized memory read: $022A
+[CPU] Uninitialized memory read: $022B
+[CPU] Uninitialized memory read: $022D
+[CPU] Uninitialized memory read: $022E
+[CPU] Uninitialized memory read: $022F
+[CPU] Uninitialized memory read: $0231
+[CPU] Uninitialized memory read: $0232
+[CPU] Uninitialized memory read: $0233
+[CPU] Uninitialized memory read: $0235
+[CPU] Uninitialized memory read: $0236
+[CPU] Uninitialized memory read: $0237
+[CPU] Uninitialized memory read: $0239
+[CPU] Uninitialized memory read: $023A
+[CPU] Uninitialized memory read: $023B
+[CPU] Uninitialized memory read: $023D
+[CPU] Uninitialized memory read: $023E
+[CPU] Uninitialized memory read: $023F
+[CPU] Uninitialized memory read: $0241
+[CPU] Uninitialized memory read: $0242
+[CPU] Uninitialized memory read: $0243
+[CPU] Uninitialized memory read: $0245
+[CPU] Uninitialized memory read: $0246
+[CPU] Uninitialized memory read: $0247
+[CPU] Uninitialized memory read: $0249
+[CPU] Uninitialized memory read: $024A
+[CPU] Uninitialized memory read: $024B
+[CPU] Uninitialized memory read: $024D
+[CPU] Uninitialized memory read: $024E
+[CPU] Uninitialized memory read: $024F
+[CPU] Uninitialized memory read: $0251
+[CPU] Uninitialized memory read: $0252
+[CPU] Uninitialized memory read: $0253
+[CPU] Uninitialized memory read: $0255
+[CPU] Uninitialized memory read: $0256
+[CPU] Uninitialized memory read: $0257
+[CPU] Uninitialized memory read: $0259
+[CPU] Uninitialized memory read: $025A
+[CPU] Uninitialized memory read: $025B
+[CPU] Uninitialized memory read: $025D
+[CPU] Uninitialized memory read: $025E
+[CPU] Uninitialized memory read: $025F
+[CPU] Uninitialized memory read: $0261
+[CPU] Uninitialized memory read: $0262
+[CPU] Uninitialized memory read: $0263
+[CPU] Uninitialized memory read: $0265
+[CPU] Uninitialized memory read: $0266
+[CPU] Uninitialized memory read: $0267
+[CPU] Uninitialized memory read: $0269
+[CPU] Uninitialized memory read: $026A
+[CPU] Uninitialized memory read: $026B
+[CPU] Uninitialized memory read: $026D
+[CPU] Uninitialized memory read: $026E
+[CPU] Uninitialized memory read: $026F
+[CPU] Uninitialized memory read: $0271
+[CPU] Uninitialized memory read: $0272
+[CPU] Uninitialized memory read: $0273
+[CPU] Uninitialized memory read: $0275
+[CPU] Uninitialized memory read: $0276
+[CPU] Uninitialized memory read: $0277
+[CPU] Uninitialized memory read: $0279
+[CPU] Uninitialized memory read: $027A
+[CPU] Uninitialized memory read: $027B
+[CPU] Uninitialized memory read: $027D
+[CPU] Uninitialized memory read: $027E
+[CPU] Uninitialized memory read: $027F
+[CPU] Uninitialized memory read: $0281
+[CPU] Uninitialized memory read: $0282
+[CPU] Uninitialized memory read: $0283
+[CPU] Uninitialized memory read: $0285
+[CPU] Uninitialized memory read: $0286
+[CPU] Uninitialized memory read: $0287
+[CPU] Uninitialized memory read: $0289
+[CPU] Uninitialized memory read: $028A
+[CPU] Uninitialized memory read: $028B
+[CPU] Uninitialized memory read: $028D
+[CPU] Uninitialized memory read: $028E
+[CPU] Uninitialized memory read: $028F
+[CPU] Uninitialized memory read: $0291
+[CPU] Uninitialized memory read: $0292
+[CPU] Uninitialized memory read: $0293
+[CPU] Uninitialized memory read: $0295
+[CPU] Uninitialized memory read: $0296
+[CPU] Uninitialized memory read: $0297
+[CPU] Uninitialized memory read: $0299
+[CPU] Uninitialized memory read: $029A
+[CPU] Uninitialized memory read: $029B
+[CPU] Uninitialized memory read: $029D
+[CPU] Uninitialized memory read: $029E
+[CPU] Uninitialized memory read: $029F
+[CPU] Uninitialized memory read: $02A1
+[CPU] Uninitialized memory read: $02A2
+[CPU] Uninitialized memory read: $02A3
+[CPU] Uninitialized memory read: $02A5
+[CPU] Uninitialized memory read: $02A6
+[CPU] Uninitialized memory read: $02A7
+[CPU] Uninitialized memory read: $02A9
+[CPU] Uninitialized memory read: $02AA
+[CPU] Uninitialized memory read: $02AB
+[CPU] Uninitialized memory read: $02AD
+[CPU] Uninitialized memory read: $02AE
+[CPU] Uninitialized memory read: $02AF
+[CPU] Uninitialized memory read: $02B1
+[CPU] Uninitialized memory read: $02B2
+[CPU] Uninitialized memory read: $02B3
+[CPU] Uninitialized memory read: $02B5
+[CPU] Uninitialized memory read: $02B6
+[CPU] Uninitialized memory read: $02B7
+[CPU] Uninitialized memory read: $02B9
+[CPU] Uninitialized memory read: $02BA
+[CPU] Uninitialized memory read: $02BB
+[CPU] Uninitialized memory read: $02BD
+[CPU] Uninitialized memory read: $02BE
+[CPU] Uninitialized memory read: $02BF
+[CPU] Uninitialized memory read: $02C1
+[CPU] Uninitialized memory read: $02C2
+[CPU] Uninitialized memory read: $02C3
+[CPU] Uninitialized memory read: $02C5
+[CPU] Uninitialized memory read: $02C6
+[CPU] Uninitialized memory read: $02C7
+[CPU] Uninitialized memory read: $02C9
+[CPU] Uninitialized memory read: $02CA
+[CPU] Uninitialized memory read: $02CB
+[CPU] Uninitialized memory read: $02CD
+[CPU] Uninitialized memory read: $02CE
+[CPU] Uninitialized memory read: $02CF
+[CPU] Uninitialized memory read: $02D1
+[CPU] Uninitialized memory read: $02D2
+[CPU] Uninitialized memory read: $02D3
+[CPU] Uninitialized memory read: $02D5
+[CPU] Uninitialized memory read: $02D6
+[CPU] Uninitialized memory read: $02D7
+[CPU] Uninitialized memory read: $02D9
+[CPU] Uninitialized memory read: $02DA
+[CPU] Uninitialized memory read: $02DB
+[CPU] Uninitialized memory read: $02DD
+[CPU] Uninitialized memory read: $02DE
+[CPU] Uninitialized memory read: $02DF
+[CPU] Uninitialized memory read: $02E1
+[CPU] Uninitialized memory read: $02E2
+[CPU] Uninitialized memory read: $02E3
+[CPU] Uninitialized memory read: $02E5
+[CPU] Uninitialized memory read: $02E6
+[CPU] Uninitialized memory read: $02E7
+[CPU] Uninitialized memory read: $02E9
+[CPU] Uninitialized memory read: $02EA
+[CPU] Uninitialized memory read: $02EB
+[CPU] Uninitialized memory read: $02ED
+[CPU] Uninitialized memory read: $02EE
+[CPU] Uninitialized memory read: $02EF
+[CPU] Uninitialized memory read: $02F1
+[CPU] Uninitialized memory read: $02F2
+[CPU] Uninitialized memory read: $02F3
+[CPU] Uninitialized memory read: $02F5
+[CPU] Uninitialized memory read: $02F6
+[CPU] Uninitialized memory read: $02F7
+[CPU] Uninitialized memory read: $02F9
+[CPU] Uninitialized memory read: $02FA
+[CPU] Uninitialized memory read: $02FB
+[CPU] Uninitialized memory read: $02FD
+[CPU] Uninitialized memory read: $02FE
+[CPU] Uninitialized memory read: $02FF
+f=168 STATE li=00 fase=01 ded=00 bsa=00 bsph=00 bank=00 px=00 py=00
+f=435 STATE li=03 fase=01 ded=00 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=866 STATE li=02 fase=01 ded=28 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=867 PAL a=3f00 v=0f pc=c2fc
+f=867 STATE li=02 fase=01 ded=27 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=868 PAL a=3f00 v=10 pc=c2fc
+f=868 STATE li=02 fase=01 ded=26 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=869 PAL a=3f00 v=10 pc=c2fc
+f=869 STATE li=02 fase=01 ded=25 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=870 PAL a=3f00 v=10 pc=c2fc
+f=870 STATE li=02 fase=01 ded=24 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=871 PAL a=3f00 v=10 pc=c2fc
+f=871 STATE li=02 fase=01 ded=23 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=872 PAL a=3f00 v=10 pc=c2fc
+f=872 STATE li=02 fase=01 ded=22 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=873 PAL a=3f00 v=10 pc=c2fc
+f=873 STATE li=02 fase=01 ded=21 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=874 PAL a=3f00 v=10 pc=c2fc
+f=874 STATE li=02 fase=01 ded=20 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=875 PAL a=3f00 v=10 pc=c2fc
+f=875 STATE li=02 fase=01 ded=1f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=876 PAL a=3f00 v=0f pc=c2fc
+f=876 STATE li=02 fase=01 ded=1e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=877 PAL a=3f00 v=0f pc=c2fc
+f=877 STATE li=02 fase=01 ded=1d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=878 PAL a=3f00 v=0f pc=c2fc
+f=878 STATE li=02 fase=01 ded=1c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=879 PAL a=3f00 v=0f pc=c2fc
+f=879 STATE li=02 fase=01 ded=1b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=880 PAL a=3f00 v=0f pc=c2fc
+f=880 STATE li=02 fase=01 ded=1a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=881 PAL a=3f00 v=0f pc=c2fc
+f=881 STATE li=02 fase=01 ded=19 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=882 PAL a=3f00 v=0f pc=c2fc
+f=882 STATE li=02 fase=01 ded=18 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=883 PAL a=3f00 v=0f pc=c2fc
+f=883 STATE li=02 fase=01 ded=17 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=884 PAL a=3f00 v=10 pc=c2fc
+f=884 STATE li=02 fase=01 ded=16 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=885 PAL a=3f00 v=10 pc=c2fc
+f=885 STATE li=02 fase=01 ded=15 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=886 PAL a=3f00 v=10 pc=c2fc
+f=886 STATE li=02 fase=01 ded=14 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=887 PAL a=3f00 v=10 pc=c2fc
+f=887 STATE li=02 fase=01 ded=13 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=888 PAL a=3f00 v=10 pc=c2fc
+f=888 STATE li=02 fase=01 ded=12 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=889 PAL a=3f00 v=10 pc=c2fc
+f=889 STATE li=02 fase=01 ded=11 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=890 PAL a=3f00 v=10 pc=c2fc
+f=890 STATE li=02 fase=01 ded=10 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=891 PAL a=3f00 v=10 pc=c2fc
+f=891 STATE li=02 fase=01 ded=0f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=892 PAL a=3f00 v=0f pc=c2fc
+f=892 STATE li=02 fase=01 ded=0e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=893 PAL a=3f00 v=0f pc=c2fc
+f=893 STATE li=02 fase=01 ded=0d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=894 PAL a=3f00 v=0f pc=c2fc
+f=894 STATE li=02 fase=01 ded=0c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=895 PAL a=3f00 v=0f pc=c2fc
+f=895 STATE li=02 fase=01 ded=0b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=896 PAL a=3f00 v=0f pc=c2fc
+f=896 STATE li=02 fase=01 ded=0a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=897 PAL a=3f00 v=0f pc=c2fc
+f=897 STATE li=02 fase=01 ded=09 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=898 PAL a=3f00 v=0f pc=c2fc
+f=898 STATE li=02 fase=01 ded=08 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=899 PAL a=3f00 v=0f pc=c2fc
+f=899 STATE li=02 fase=01 ded=07 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=900 PAL a=3f00 v=10 pc=c2fc
+f=900 STATE li=02 fase=01 ded=06 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=901 PAL a=3f00 v=10 pc=c2fc
+f=901 STATE li=02 fase=01 ded=05 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=902 PAL a=3f00 v=10 pc=c2fc
+f=902 STATE li=02 fase=01 ded=04 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=903 PAL a=3f00 v=10 pc=c2fc
+f=903 STATE li=02 fase=01 ded=03 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=904 PAL a=3f00 v=10 pc=c2fc
+f=904 STATE li=02 fase=01 ded=02 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=905 PAL a=3f00 v=10 pc=c2fc
+f=905 STATE li=02 fase=01 ded=01 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=906 PAL a=3f00 v=10 pc=c2fc
+f=906 PAL a=3f00 v=0f pc=c2fc
+f=906 STATE li=02 fase=01 ded=00 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=1885 PAL a=3f19 v=03 pc=c2fc
+f=1885 PAL a=3f1a v=23 pc=c2fc
+f=1885 PAL a=3f1b v=38 pc=c2fc
+f=2193 STATE li=01 fase=01 ded=28 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2194 PAL a=3f00 v=0f pc=c2fc
+f=2194 STATE li=01 fase=01 ded=27 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2195 PAL a=3f00 v=10 pc=c2fc
+f=2195 STATE li=01 fase=01 ded=26 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2196 PAL a=3f00 v=10 pc=c2fc
+f=2196 STATE li=01 fase=01 ded=25 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2197 PAL a=3f00 v=10 pc=c2fc
+f=2197 STATE li=01 fase=01 ded=24 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2198 PAL a=3f00 v=10 pc=c2fc
+f=2198 STATE li=01 fase=01 ded=23 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2199 PAL a=3f00 v=10 pc=c2fc
+f=2199 STATE li=01 fase=01 ded=22 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2200 PAL a=3f00 v=10 pc=c2fc
+f=2200 STATE li=01 fase=01 ded=21 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2201 PAL a=3f00 v=10 pc=c2fc
+f=2201 STATE li=01 fase=01 ded=20 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2202 PAL a=3f00 v=10 pc=c2fc
+f=2202 STATE li=01 fase=01 ded=1f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2203 PAL a=3f00 v=0f pc=c2fc
+f=2203 STATE li=01 fase=01 ded=1e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2204 PAL a=3f00 v=0f pc=c2fc
+f=2204 STATE li=01 fase=01 ded=1d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2205 PAL a=3f00 v=0f pc=c2fc
+f=2205 STATE li=01 fase=01 ded=1c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2206 PAL a=3f00 v=0f pc=c2fc
+f=2206 STATE li=01 fase=01 ded=1b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2207 PAL a=3f00 v=0f pc=c2fc
+f=2207 STATE li=01 fase=01 ded=1a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2208 PAL a=3f00 v=0f pc=c2fc
+f=2208 STATE li=01 fase=01 ded=19 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2209 PAL a=3f00 v=0f pc=c2fc
+f=2209 STATE li=01 fase=01 ded=18 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2210 PAL a=3f00 v=0f pc=c2fc
+f=2210 STATE li=01 fase=01 ded=17 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2211 PAL a=3f00 v=10 pc=c2fc
+f=2211 STATE li=01 fase=01 ded=16 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2212 PAL a=3f00 v=10 pc=c2fc
+f=2212 STATE li=01 fase=01 ded=15 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2213 PAL a=3f00 v=10 pc=c2fc
+f=2213 STATE li=01 fase=01 ded=14 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2214 PAL a=3f00 v=10 pc=c2fc
+f=2214 STATE li=01 fase=01 ded=13 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2215 PAL a=3f00 v=10 pc=c2fc
+f=2215 STATE li=01 fase=01 ded=12 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2216 PAL a=3f00 v=10 pc=c2fc
+f=2216 STATE li=01 fase=01 ded=11 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2217 PAL a=3f00 v=10 pc=c2fc
+f=2217 STATE li=01 fase=01 ded=10 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2218 PAL a=3f00 v=10 pc=c2fc
+f=2218 STATE li=01 fase=01 ded=0f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2219 PAL a=3f00 v=0f pc=c2fc
+f=2219 STATE li=01 fase=01 ded=0e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2220 PAL a=3f00 v=0f pc=c2fc
+f=2220 STATE li=01 fase=01 ded=0d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2221 PAL a=3f00 v=0f pc=c2fc
+f=2221 STATE li=01 fase=01 ded=0c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2222 PAL a=3f00 v=0f pc=c2fc
+f=2222 STATE li=01 fase=01 ded=0b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2223 PAL a=3f00 v=0f pc=c2fc
+f=2223 STATE li=01 fase=01 ded=0a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2224 PAL a=3f00 v=0f pc=c2fc
+f=2224 STATE li=01 fase=01 ded=09 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2225 PAL a=3f00 v=0f pc=c2fc
+f=2225 STATE li=01 fase=01 ded=08 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2226 PAL a=3f00 v=0f pc=c2fc
+f=2226 STATE li=01 fase=01 ded=07 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2227 PAL a=3f00 v=10 pc=c2fc
+f=2227 STATE li=01 fase=01 ded=06 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2228 PAL a=3f00 v=10 pc=c2fc
+f=2228 STATE li=01 fase=01 ded=05 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2229 PAL a=3f00 v=10 pc=c2fc
+f=2229 STATE li=01 fase=01 ded=04 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2230 PAL a=3f00 v=10 pc=c2fc
+f=2230 STATE li=01 fase=01 ded=03 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2231 PAL a=3f00 v=10 pc=c2fc
+f=2231 STATE li=01 fase=01 ded=02 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2232 PAL a=3f00 v=10 pc=c2fc
+f=2232 STATE li=01 fase=01 ded=01 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2233 PAL a=3f00 v=10 pc=c2fc
+f=2233 PAL a=3f00 v=0f pc=c2fc
+f=2233 STATE li=01 fase=01 ded=00 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2410 STATE li=00 fase=01 ded=28 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2411 PAL a=3f00 v=0f pc=c2fc
+f=2411 STATE li=00 fase=01 ded=27 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2412 PAL a=3f00 v=10 pc=c2fc
+f=2412 STATE li=00 fase=01 ded=26 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2413 PAL a=3f00 v=10 pc=c2fc
+f=2413 STATE li=00 fase=01 ded=25 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2414 PAL a=3f00 v=10 pc=c2fc
+f=2414 STATE li=00 fase=01 ded=24 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2415 PAL a=3f00 v=10 pc=c2fc
+f=2415 STATE li=00 fase=01 ded=23 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2416 PAL a=3f00 v=10 pc=c2fc
+f=2416 STATE li=00 fase=01 ded=22 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2417 PAL a=3f00 v=10 pc=c2fc
+f=2417 STATE li=00 fase=01 ded=21 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2418 PAL a=3f00 v=10 pc=c2fc
+f=2418 STATE li=00 fase=01 ded=20 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2419 PAL a=3f00 v=10 pc=c2fc
+f=2419 STATE li=00 fase=01 ded=1f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2420 PAL a=3f00 v=0f pc=c2fc
+f=2420 STATE li=00 fase=01 ded=1e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2421 PAL a=3f00 v=0f pc=c2fc
+f=2421 STATE li=00 fase=01 ded=1d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2422 PAL a=3f00 v=0f pc=c2fc
+f=2422 STATE li=00 fase=01 ded=1c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2423 PAL a=3f00 v=0f pc=c2fc
+f=2423 STATE li=00 fase=01 ded=1b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2424 PAL a=3f00 v=0f pc=c2fc
+f=2424 STATE li=00 fase=01 ded=1a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2425 PAL a=3f00 v=0f pc=c2fc
+f=2425 STATE li=00 fase=01 ded=19 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2426 PAL a=3f00 v=0f pc=c2fc
+f=2426 STATE li=00 fase=01 ded=18 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2427 PAL a=3f00 v=0f pc=c2fc
+f=2427 STATE li=00 fase=01 ded=17 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2428 PAL a=3f00 v=10 pc=c2fc
+f=2428 STATE li=00 fase=01 ded=16 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2429 PAL a=3f00 v=10 pc=c2fc
+f=2429 STATE li=00 fase=01 ded=15 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2430 PAL a=3f00 v=10 pc=c2fc
+f=2430 STATE li=00 fase=01 ded=14 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2431 PAL a=3f00 v=10 pc=c2fc
+f=2431 STATE li=00 fase=01 ded=13 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2432 PAL a=3f00 v=10 pc=c2fc
+f=2432 STATE li=00 fase=01 ded=12 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2433 PAL a=3f00 v=10 pc=c2fc
+f=2433 STATE li=00 fase=01 ded=11 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2434 PAL a=3f00 v=10 pc=c2fc
+f=2434 STATE li=00 fase=01 ded=10 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2435 PAL a=3f00 v=10 pc=c2fc
+f=2435 STATE li=00 fase=01 ded=0f bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2436 PAL a=3f00 v=0f pc=c2fc
+f=2436 STATE li=00 fase=01 ded=0e bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2437 PAL a=3f00 v=0f pc=c2fc
+f=2437 STATE li=00 fase=01 ded=0d bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2438 PAL a=3f00 v=0f pc=c2fc
+f=2438 STATE li=00 fase=01 ded=0c bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2439 PAL a=3f00 v=0f pc=c2fc
+f=2439 STATE li=00 fase=01 ded=0b bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2440 PAL a=3f00 v=0f pc=c2fc
+f=2440 STATE li=00 fase=01 ded=0a bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2441 PAL a=3f00 v=0f pc=c2fc
+f=2441 STATE li=00 fase=01 ded=09 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2442 PAL a=3f00 v=0f pc=c2fc
+f=2442 STATE li=00 fase=01 ded=08 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2443 PAL a=3f00 v=0f pc=c2fc
+f=2443 STATE li=00 fase=01 ded=07 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2444 PAL a=3f00 v=10 pc=c2fc
+f=2444 STATE li=00 fase=01 ded=06 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2445 PAL a=3f00 v=10 pc=c2fc
+f=2445 STATE li=00 fase=01 ded=05 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2446 PAL a=3f00 v=10 pc=c2fc
+f=2446 STATE li=00 fase=01 ded=04 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2447 PAL a=3f00 v=10 pc=c2fc
+f=2447 STATE li=00 fase=01 ded=03 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2448 PAL a=3f00 v=10 pc=c2fc
+f=2448 STATE li=00 fase=01 ded=02 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2449 PAL a=3f00 v=10 pc=c2fc
+f=2449 STATE li=00 fase=01 ded=01 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2450 PAL a=3f00 v=10 pc=c2fc
+f=2450 PAL a=3f00 v=0f pc=c2fc
+f=2450 STATE li=00 fase=01 ded=00 bsa=00 bsph=00 bank=00 px=78 py=c8
+f=2466 PAL a=3f00 v=0f pc=c2eb
+f=2466 PAL a=3f01 v=11 pc=c2eb
+f=2466 PAL a=3f02 v=21 pc=c2eb
+f=2466 PAL a=3f03 v=00 pc=c2eb
+f=2466 PAL a=3f04 v=0f pc=c2eb
+f=2466 PAL a=3f05 v=00 pc=c2eb
+f=2466 PAL a=3f06 v=10 pc=c2eb
+f=2466 PAL a=3f07 v=30 pc=c2eb
+f=2466 PAL a=3f08 v=0f pc=c2eb
+f=2466 PAL a=3f09 v=06 pc=c2eb
+f=2466 PAL a=3f0a v=16 pc=c2eb
+f=2466 PAL a=3f0b v=30 pc=c2eb
+f=2466 PAL a=3f0c v=0f pc=c2eb
+f=2466 PAL a=3f0d v=1c pc=c2eb
+f=2466 PAL a=3f0e v=10 pc=c2eb
+f=2466 PAL a=3f0f v=30 pc=c2eb
+f=2466 PAL a=3f10 v=0f pc=c2eb
+f=2466 PAL a=3f11 v=00 pc=c2eb
+f=2466 PAL a=3f12 v=10 pc=c2eb
+f=2466 PAL a=3f13 v=30 pc=c2eb
+f=2466 PAL a=3f14 v=0f pc=c2eb
+f=2466 PAL a=3f15 v=16 pc=c2eb
+f=2466 PAL a=3f16 v=21 pc=c2eb
+f=2466 PAL a=3f17 v=12 pc=c2eb
+f=2466 PAL a=3f18 v=0f pc=c2eb
+f=2466 PAL a=3f19 v=19 pc=c2eb
+f=2466 PAL a=3f1a v=2a pc=c2eb
+f=2466 PAL a=3f1b v=30 pc=c2eb
+f=2466 PAL a=3f1c v=0f pc=c2eb
+f=2466 PAL a=3f1d v=1c pc=c2eb
+f=2466 PAL a=3f1e v=3c pc=c2eb
+f=2466 PAL a=3f1f v=30 pc=c2eb
+f=2470 PAL a=3f01 v=0f pc=c2fc
+f=2470 PAL a=3f02 v=0f pc=c2fc
+f=2470 PAL a=3f03 v=0f pc=c2fc
+f=2470 PAL a=3f05 v=0f pc=c2fc
+f=2470 PAL a=3f06 v=0f pc=c2fc
+f=2470 PAL a=3f07 v=0f pc=c2fc
+f=2471 PAL a=3f03 v=0f pc=c2fc
+f=2471 PAL a=3f07 v=0f pc=c2fc
+f=2475 PAL a=3f03 v=00 pc=c2fc
+f=2475 PAL a=3f07 v=00 pc=c2fc
+f=2479 PAL a=3f03 v=00 pc=c2fc
+f=2479 PAL a=3f07 v=00 pc=c2fc
+f=2483 PAL a=3f03 v=10 pc=c2fc
+f=2483 PAL a=3f07 v=10 pc=c2fc
+f=2487 PAL a=3f03 v=10 pc=c2fc
+f=2487 PAL a=3f07 v=10 pc=c2fc
+f=2491 PAL a=3f03 v=20 pc=c2fc
+f=2491 PAL a=3f07 v=20 pc=c2fc
+f=2495 PAL a=3f03 v=30 pc=c2fc
+f=2495 PAL a=3f07 v=30 pc=c2fc

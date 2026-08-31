@@ -1,0 +1,66 @@
+OK   ROM 524304 bytes (524304)
+OK   header iNES presente
+OK   mapper 30 (30)
+OK   32 bancos PRG / CHR-RAM (32/0)
+MD5    d56601e0eac8dd51f78f08daa921d141
+SHA256 d8ea1c446cb153faaf44e905fa9197f68ef33dd7c17e2d97b8c626466369f1ce
+OK   nenhum FOR numerico acima de 254
+OK   boot produziu frames de video
+OK   titulo tem imagem nao-uniforme
+OK   boot termina na FASE=1
+OK   boot termina no CHRRAM bank $00
+  (gameplay inicial em 220f de espera)
+OK   FASE=2 apos a preparacao (0f)
+OK   fase 2: CHRRAM bank $40
+OK   fase 2: scroll ativo
+OK   fase 2: cenario vermelho (18514 px)
+OK   FASE=3 apos a preparacao (0f)
+OK   fase 3: CHRRAM bank $00
+OK   fase 3: scroll ativo
+OK   fase 3: cenario espacial (60993 px)
+OK   FASE=4 apos a preparacao (0f)
+OK   fase 4: CHRRAM bank $40
+OK   fase 4: scroll ativo
+OK   fase 4: cenario azul (18510 px)
+OK   FASE=5 apos a preparacao (0f)
+OK   fase 5: CHRRAM bank $00
+OK   fase 5: scroll ativo
+OK   fase 5: cenario espacial (61004 px)
+OK   FASE=1 apos a preparacao (0f)
+OK   fase 1: CHRRAM bank $00
+OK   fase 1: scroll ativo
+OK   fase 1: cenario espacial (60984 px)
+OK   ciclo SELECT 1 -> 2 -> 3 -> 4 -> 5 -> 1
+OK   FASE=2 apos a preparacao (0f)
+OK   fase 2: CHRRAM bank $40
+OK   fase 2: scroll ativo
+OK   fase 2: cenario vermelho (18514 px)
+OK   FASE=3 apos a preparacao (0f)
+OK   fase 3: CHRRAM bank $00
+OK   fase 3: scroll ativo
+OK   fase 3: cenario espacial (60984 px)
+OK   FASE=4 apos a preparacao (0f)
+OK   fase 4: CHRRAM bank $40
+OK   fase 4: scroll ativo
+OK   fase 4: cenario azul (18516 px)
+OK   FASE=5 apos a preparacao (0f)
+OK   fase 5: CHRRAM bank $00
+OK   fase 5: scroll ativo
+OK   fase 5: cenario espacial (60985 px)
+OK   boss inicia com HP 120 (1f)
+OK   boss usa BG na tabela $1000 (PPUCTRL $B8)
+OK   boss produziu cena visivel
+OK   slot de tiro disponivel para o boss
+OK   primeiro tiro reduz HP (120->119)
+OK   slot de tiro disponivel para o golpe final
+OK   fluxo sai do boss para a cerimonia
+OK   ending retorna ao estado FASE=1
+OK   ending nao encurta telas (1585f ate FASE=1)
+OK   quatro telas do ending renderizadas (runs=[226, 286, 466, 286])
+OK   ending tela 1 permanece estavel (226f >= 150f)
+OK   ending tela 2 permanece estavel (286f >= 200f)
+OK   ending tela 3 permanece estavel (466f >= 350f)
+OK   ending tela 4 permanece estavel (286f >= 200f)
+OK   partida nova volta ao cenario espacial
+
+RESULTADO: V0.28 BASELINE OK
