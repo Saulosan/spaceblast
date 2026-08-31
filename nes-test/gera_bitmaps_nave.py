@@ -5,7 +5,10 @@ Cada slot = 4 metades 8x16: corpoE, corpoD, canopy (azul/verm), chama (verde).
 Tile inicial: 276  ->  f = 21 + slot*8 + metade*2
 """
 import sys
-sys.path.insert(0, '/home/user/nes-test')
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
 from mock_nave import NES, nearest_idx, im
 from mock_nave3 import classifica, PAL_CINZA, PAL_CANOPY, PAL_CHAMA
 
@@ -53,6 +56,6 @@ for si, fi in enumerate(SLOTS):
         for s in linhas:
             out.append('\tBITMAP "%s"' % s)
 
-with open('/home/user/nes-test/nave_bitmaps.txt', 'w') as f:
+with (HERE / 'nave_bitmaps.txt').open('w', encoding='utf-8') as f:
     f.write('\n'.join(out) + '\n')
 print('linhas:', len(out), '= %d bitmaps' % (len(SLOTS)*4))

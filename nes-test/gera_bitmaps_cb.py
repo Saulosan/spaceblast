@@ -6,13 +6,19 @@ Tiles a partir de 364:
   shard   378-381   (f 123+i)           4 fr 8x8
   ebullet 382-383   (f 127, 128)        2 fr 8x8
 """
+import os
 import sys
-sys.path.insert(0, '/home/user/nes-test')
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+PROJECT = HERE.parent
+sys.path.insert(0, str(HERE))
 from mock_nave import NES, nearest_idx
 from PIL import Image
 import PIL.ImageSequence as seq
 
-SP = '/home/user/spaceblast/assets/sprites/'
+SP = Path(os.environ.get('SPACEBLAST_SPRITES',
+                        PROJECT / 'spaceblast' / 'assets' / 'sprites'))
 PRETO = (28, 28, 28)   # abaixo disso vira transparente (contorno se dissolve)
 
 def esc(mapa, pal):
@@ -50,7 +56,7 @@ out.append("\t' f=123..126 | tiro inimigo (2 fr 8x8) f=127,128")
 out.append("\tCHRROM PATTERN 364")
 
 # tiro03: 2 frames 16x16 -> 8x8 (subsample 2)
-im = Image.open(SP + 'tiro-03.gif')
+im = Image.open(SP / 'tiro-03.gif')
 for fi in range(2):
     im.seek(fi)
     t = im.convert('RGBA')
@@ -59,7 +65,7 @@ for fi in range(2):
         out.append('\tBITMAP "%s"' % s)
 
 # small: frames 13, 15, 18 (direita) -> 16x16, duas metades 8x16
-im = Image.open(SP + 'Enemy1.png').convert('RGBA')
+im = Image.open(SP / 'Enemy1.png').convert('RGBA')
 for i, fr in enumerate([13, 15, 18]):
     for half, x0 in enumerate([0, 8]):
         out.append("\t' small fr%d metade%d f=%d" % (fr, half, 111 + i * 4 + half * 2))
@@ -67,7 +73,7 @@ for i, fr in enumerate([13, 15, 18]):
             out.append('\tBITMAP "%s"' % s)
 
 # shard: frames 0,2,5,7 -> 8x8 (subsample 4)
-im = Image.open(SP + 'Enemy5.gif')
+im = Image.open(SP / 'Enemy5.gif')
 for i, fr in enumerate([0, 2, 5, 7]):
     im.seek(fr)
     t = im.convert('RGBA')
@@ -76,7 +82,7 @@ for i, fr in enumerate([0, 2, 5, 7]):
         out.append('\tBITMAP "%s"' % s)
 
 # bullet inimigo: frames 0,2 -> 8x8 (subsample 1 == 8x8 nativo, paleta forçada [16,30])
-im = Image.open(SP + 'bullet.gif')
+im = Image.open(SP / 'bullet.gif')
 for i, fr in enumerate([0, 2]):
     im.seek(fr)
     t = im.convert('RGBA')
@@ -84,6 +90,6 @@ for i, fr in enumerate([0, 2]):
     for s in bmp(t, 0, 0, 8, 8, [0x16, 0x30], 1):
         out.append('\tBITMAP "%s"' % s)
 
-with open('/home/user/nes-test/cb_bitmaps.txt', 'w') as f:
+with (HERE / 'cb_bitmaps.txt').open('w', encoding='utf-8') as f:
     f.write('\n'.join(out) + '\n')
 print('linhas:', len(out))
