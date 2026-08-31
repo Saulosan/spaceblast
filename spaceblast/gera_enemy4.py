@@ -5,9 +5,14 @@
 # Bits: 1 = corpo (roxo escuro), 2 = asas (ouro), 3 = brilhos (claros/verde).
 # Com pal0 (cinzas $00/$10/$30) vira meteoro rochoso: corpo escuro,
 # asas medias, brilhos brancos. Trocar de paleta = mudar o attr no SPRITE.
+from pathlib import Path
+import os
 from PIL import Image
 
-SRC = '/home/user/caravanblast/assets/sprites/Enemy4.gif'
+HERE = Path(__file__).resolve().parent
+SRC = HERE / 'assets' / 'sprites' / 'Enemy4.gif'
+OUTDIR = Path(os.environ.get('SPACEBLAST_GENERATED', '/tmp'))
+OUTDIR.mkdir(parents=True, exist_ok=True)
 
 def classifica(r, g, b, a):
     if a <= 100:
@@ -37,7 +42,7 @@ prev = Image.new('RGB', (16, 16), CH[0])
 for y in range(16):
     for x in range(16):
         prev.putpixel((x, y), CH[frames[0][y][x]])
-prev.resize((128, 128), Image.NEAREST).save('/tmp/enemy4_nes.png')
+prev.resize((128, 128), Image.NEAREST).save(OUTDIR / 'enemy4_nes.png')
 
 # gera bloco CVBasic: PATTERN 392/394, metade esq (2 tiles) + dir (2 tiles)
 out = []
@@ -53,6 +58,6 @@ for k, g in enumerate(frames):
                    % (metade, 2 * ((tspr - 256) // 2) + 1))
         for y in range(16):
             out.append('\tBITMAP "' + ''.join(PL[g[y][xo + x]] for x in range(8)) + '"\n')
-open('/tmp/enemy4_tiles.bas', 'w').writelines(out)
+(OUTDIR / 'enemy4_tiles.bas').write_text(''.join(out))
 print(''.join(out))
 

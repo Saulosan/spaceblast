@@ -1,12 +1,41 @@
 # Space Blast (NES) — Histórico completo do projeto
 
-**Ponto de partida / backup** — gerado em 29/07/2026.
-Este documento resume TUDO que foi feito na conversa, para que o projeto
-possa ser retomado do zero caso o histórico da conversa se perca.
+**Ponto de partida / backup** — gerado em 29/07/2026; atualização da
+baseline em 28/08/2026.
+Este documento resume o histórico técnico para que o projeto possa ser
+retomado mesmo sem o histórico da conversa.
 
-**ESTADO ATUAL = v0.24** (v0.23 logo abaixo; v0.22 → v0.18 → v0.15 → v0.7–v0.10 depois):
+**ESTADO ATUAL = v0.28 baseline**. A fonte de gameplay permanece congelada;
+esta etapa só consolidou a infraestrutura de build/teste e corrigiu os
+três laços de duração longa das telas finais.
 
-### v0.24 — Torus de 31 slots (scroll definitivo) — ESTADO ATUAL
+### v0.28 baseline — build reproduzível e validação externa
+
+ROM entregue: `b22ac571b09857c03b04016c692f6502` (MD5),
+`c464d8db98fb2ec4e3f6b8270ebb98458e86095bba92ee9252dc9972d2cfaee5`
+(SHA-256), 524.304 bytes, iNES mapper 30, 512 KiB PRG e CHR-RAM.
+
+- A suíte independente `nes-test/test_v028_baseline.py` passou: boot,
+  ciclo SELECT `1 → 2 → 3 → 4 → 5 → 1`, bancos CHR `$00/$40`, cenários
+  espacial/vermelho/azul, boss da fase 5 (HP 120, dano e morte), cerimônia,
+  quatro telas do ending e retorno a uma partida nova na fase 1.
+- A inspeção de código confirmou que não restou `FOR` numérico acima de
+  254. CVBasic mantém contadores de laço em 8 bits; portanto os holds que
+  estavam escritos como `0 TO 269` e `0 TO 449` foram substituídos por
+  `2 × 135 = 270` e `2 × 225 = 450` frames. Isso corrige a duração sem
+  mudar a lógica de gameplay.
+- `build.sh`, `build-dbg.sh`, `gen_addrs.py`, `emu_lib.py` e os geradores
+  principais passaram a resolver caminhos relativos ao próprio script; o
+  build aceita `CVBASIC_BIN`, `GASM80_BIN` e a suíte aceita `FCEUMM_CORE`.
+  Nenhum procedimento depende do GitHub Desktop.
+- Resultado observado no emulador: os holds estáveis medidos foram
+  `226/286/466/286` frames (fade + overhead explicam a diferença do alvo),
+  e a fase 1 voltou em 1.585 frames após a morte do boss.
+- **Não iniciar recursos de gameplay** antes do teste do usuário no Mesen
+  e no hardware real. Próxima ação após o retorno: registrar o veredito e só
+  então planejar inimigos próprios/detalhes visuais.
+
+### v0.24 — Torus de 31 slots (scroll definitivo) — histórico anterior
 Saulo testou a v0.23: "tudo é gerado certo fora da tela lá em cima,
 mas muda um pouco abaixo do meio... ilhas da esquerda desaparecem
 depois de 1 scroll". AUTÓPSIA da nossa própria correção:
@@ -833,7 +862,9 @@ zerados. ROM f25c88c6bf9861cde3007398041fa0f7. Suites 4/4 verdes.
 
 ## v0.28 (01/ago, ordem do Saulo): AS 5 FASES + FIM DE JOGO
 
-ROM `8ac873400a4d8c15b4ad4dd2c5fea1d3`. Base v0.27 aprovada.
+ROM de referência da implementação original: `8ac873400a4d8c15b4ad4dd2c5fea1d3`.
+Base v0.27 aprovada. A ROM recompilada/consolidada está registrada no
+bloco `v0.28 baseline` no início deste arquivo.
 
 - Pedido: gerar todas as fases "no mesmo esquema" (scroll simples fase
   1, mesmos inimigos da fase 1, mesmo boss em todas); depois vêm os
@@ -875,8 +906,10 @@ ROM `8ac873400a4d8c15b4ad4dd2c5fea1d3`. Base v0.27 aprovada.
   fase 2, boss2(lava) -> card FASE 03 (acentos OK) -> fase 3, ending 3
   telas -> volta fase 1 LI=3. Shot da fase 4: azul-agua, contraste ok.
 - GIF space-blast-v028.gif: ciclo animado das 5 fases.
-- Pendente: veredito do Saulo no Mesen/Everdrive. Proxima etapa: 
-  inimigos proprios de cada fase + detalhes finais.
+- A validação interna foi consolidada na suíte independente
+  `nes-test/test_v028_baseline.py`; o veredito externo no Mesen/Everdrive
+  continua pendente. Depois dele, e somente com aprovação, vêm inimigos
+  próprios de cada fase e detalhes finais.
 
 ROM `65a15b2b3e51bd04a2cad0a03abbb395`. Base v0.26 aprovada ("duas fases
 certinhas, scrolls perfeitos — ponto de partida").

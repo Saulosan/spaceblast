@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # Aplica a tela splash FALCON SOFT (v0.16) no space-blast.bas.
-BAS = '/home/user/spaceblast/space-blast.bas'
-src = open(BAS).read()
-inc = open('/home/user/spaceblast/falcon_chr.bas.inc').read()
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BAS = HERE / 'space-blast.bas'
+INC = HERE / 'falcon_chr.bas.inc'
+src = BAS.read_text(encoding='utf-8')
+inc = INC.read_text(encoding='utf-8')
 
 # divide inc: parte CHR (ate antes de "falcon_map:") e parte DATA
 i = inc.index('falcon_map:')

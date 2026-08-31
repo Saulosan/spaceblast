@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 # SPACE BLAST v0.16: logo da Falcon Soft (splash) -> CHRROM 1 (CHRRAM pagina 1)
-# Entrada : /home/user/uploads/Falconsoft-montado.png (128x78, preto/cinza/branco)
-# Saida   : /home/user/spaceblast/falcon_chr.bas.inc (fragmento p/ patch)
+# Entrada : ../uploads/Falconsoft-montado.png (128x78, preto/cinza/branco)
+# Saida   : falcon_chr.bas.inc (fragmento p/ patch)
 #           + preview p/ conferencia visual
+import os
 import re
+from pathlib import Path
 import numpy as np
 from PIL import Image
 
-UP  = '/home/user/uploads/Falconsoft-montado.png'
-OUT = '/home/user/spaceblast/falcon_chr.bas.inc'
-PREV = '/home/user/spaceblast/docs/falcon_chr_preview.png'
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+UP  = UPLOADS / 'Falconsoft-montado.png'
+OUT = HERE / 'falcon_chr.bas.inc'
+PREV = HERE / 'docs' / 'falcon_chr_preview.png'
 
 def norm(a):
     out = np.zeros_like(a, dtype=np.uint8)
@@ -36,7 +40,8 @@ NT = len(tiles)
 print("tiles unicos:", NT, "-> patterns", 96, "a", 96+NT-1)
 
 # fonte CVBasic (cvbasic.c) p/ 'apresenta' (8x8, plano duplo = idx 3)
-cfont = open('/home/user/cvbasic-repo/cvbasic.c').read()
+cfont_path = Path(os.environ.get('CVBASIC_SRC', HERE.parent / 'cvbasic-repo')) / 'cvbasic.c'
+cfont = cfont_path.read_text(encoding='utf-8')
 m = re.search(r'unsigned char font\[\] = \{(.*?)\};', cfont, re.S)
 corpo = re.sub(r'//[^\n]*', '', m.group(1))   # remove comentarios inline
 bytes_font = [int(v, 16) for v in re.findall(r'0x([0-9a-fA-F]{2})', corpo)]

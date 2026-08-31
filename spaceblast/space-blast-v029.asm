@@ -1,6 +1,6 @@
 	; CVBasic compiler v0.9.2 Mar/12/2026
-	; Command: cvbasic --nes space-blast.bas space-blast.asm
-	; Created: reproducible build
+	; Command: cvbasic --nes space-blast-v029.bas space-blast-v029.asm 
+	; Created: reproducible v0.29 candidate build
 
 COLECO:	equ 0
 SG1000:	equ 0
@@ -1870,6 +1870,8 @@ array_SNV:	equ $047f
 array_SHVX:	equ $0485
 ram_end:
 	; BANK ROM 512	' v0.15: UNROM 512 (mapper 30) nativo do CVBasic!	' jogo
+	; 	' v0.29 candidate: limita lotes de VPOKE durante flashes/cenas de morte
+	; 	' para caber no VBlank; nenhuma mecanica ou arte foi alterada.
 	; 							' segue TODO no banco 0 (32K) como na v0.14; bancos
 	; 							' 1-28 livres p/ fases 2-5 + CHRROM 0-3 p/ tiles
 	; 
@@ -10202,6 +10204,8 @@ cv256:
 	LDA #cvb_GAME_PALETTE_TITLE>>8
 	STA temp+1
 	JSR LDIRVM
+	; 	WAIT			' separa a carga da paleta dos attrs (limite do NMI)
+	JSR wait
 	; 	FOR i = 0 TO 39		' zera attrs das linhas 0-4 (se morreu no boss)
 	LDA #0
 	STA cvb_I
@@ -10224,6 +10228,12 @@ cv257:
 	TAX
 	LDA temp
 	JSR WRTVRM
+	; 		IF i = 31 THEN WAIT	' no maximo 32 escritas por VBlank
+	LDA cvb_I
+	CMP #31
+	BNE.L cv258
+	JSR wait
+cv258:
 	; 	NEXT i
 	INC cvb_I
 	LDA cvb_I
@@ -10343,34 +10353,34 @@ cvb_GO_WAIT:
 	LDY #0
 	STY temp
 	ORA temp
-	BNE.L cv258
+	BNE.L cv259
 	; 		PRINT AT 458,"APERTE START"
 	JSR print_string_cursor_constant
 	DB $ca,$01,$0c
 	DB $41,$50,$45,$52,$54,$45,$20,$53
 	DB $54,$41,$52,$54
 	; 	ELSE
-	JMP cv259
-cv258:
+	JMP cv260
+cv259:
 	; 		PRINT AT 458,"            "
 	JSR print_string_cursor_constant
 	DB $ca,$01,$0c
 	DB $20,$20,$20,$20,$20,$20,$20,$20
 	DB $20,$20,$20,$20
 	; 	END IF
-cv259:
+cv260:
 	; 	IF CONT1.KEY = 11 THEN GOTO go_reset	' v0.25: reset de software!
 	LDA key1_data
 	CMP #11
-	BNE.L cv260
+	BNE.L cv261
 	JMP cvb_GO_RESET
-cv260:
+cv261:
 	; 	IF CONT1.BUTTON THEN GOTO go_reset
 	LDA joy1_data
 	AND #64
-	BEQ.L cv261
+	BEQ.L cv262
 	JMP cvb_GO_RESET
-cv261:
+cv262:
 	; 	GOTO go_wait
 	JMP cvb_GO_WAIT
 	; 
@@ -10458,7 +10468,7 @@ cvb_STARS_FILL:
 	; 	FOR sk = 0 TO 47
 	LDA #0
 	STA cvb_SK
-cv262:
+cv263:
 	; 		VPOKE $2000 + #stw(sk), stt(sk)
 	LDA #array_STT
 	CLC
@@ -10495,17 +10505,23 @@ cv262:
 	TAX
 	LDA temp
 	JSR WRTVRM
+	; 		IF sk = 31 THEN WAIT
+	LDA cvb_SK
+	CMP #31
+	BNE.L cv264
+	JSR wait
+cv264:
 	; 	NEXT sk
 	INC cvb_SK
 	LDA cvb_SK
 	CMP #48
-	BCC.L cv262
+	BCC.L cv263
 	; 	WAIT
 	JSR wait
 	; 	FOR sk = 0 TO 47
 	LDA #0
 	STA cvb_SK
-cv263:
+cv265:
 	; 		VPOKE $2400 + #stw(sk), stt(sk)
 	LDA #array_STT
 	CLC
@@ -10542,17 +10558,23 @@ cv263:
 	TAX
 	LDA temp
 	JSR WRTVRM
+	; 		IF sk = 31 THEN WAIT
+	LDA cvb_SK
+	CMP #31
+	BNE.L cv266
+	JSR wait
+cv266:
 	; 	NEXT sk
 	INC cvb_SK
 	LDA cvb_SK
 	CMP #48
-	BCC.L cv263
+	BCC.L cv265
 	; 	WAIT
 	JSR wait
 	; 	FOR sk = 0 TO 47
 	LDA #0
 	STA cvb_SK
-cv264:
+cv267:
 	; 		VPOKE $2800 + #stw(sk), stt(sk)
 	LDA #array_STT
 	CLC
@@ -10589,11 +10611,17 @@ cv264:
 	TAX
 	LDA temp
 	JSR WRTVRM
+	; 		IF sk = 31 THEN WAIT
+	LDA cvb_SK
+	CMP #31
+	BNE.L cv268
+	JSR wait
+cv268:
 	; 	NEXT sk
 	INC cvb_SK
 	LDA cvb_SK
 	CMP #48
-	BCC.L cv264
+	BCC.L cv267
 	; 	WAIT
 	JSR wait
 	; END
@@ -10697,10 +10725,10 @@ cvb_SCORE_ADD:
 	ADC cvb_D
 	STA cvb_S3
 	; 	WHILE s3 > 9
-cv265:
+cv269:
 	LDA cvb_S3
 	CMP #10
-	BCC.L cv266
+	BCC.L cv270
 	; 		s3 = s3 - 10
 	SEC
 	SBC #10
@@ -10708,13 +10736,13 @@ cv265:
 	; 		s2 = s2 + 1
 	INC cvb_S2
 	; 	WEND
-	JMP cv265
-cv266:
+	JMP cv269
+cv270:
 	; 	WHILE s2 > 9
-cv267:
+cv271:
 	LDA cvb_S2
 	CMP #10
-	BCC.L cv268
+	BCC.L cv272
 	; 		s2 = s2 - 10
 	SEC
 	SBC #10
@@ -10722,13 +10750,13 @@ cv267:
 	; 		s1 = s1 + 1
 	INC cvb_S1
 	; 	WEND
-	JMP cv267
-cv268:
+	JMP cv271
+cv272:
 	; 	WHILE s1 > 9
-cv269:
+cv273:
 	LDA cvb_S1
 	CMP #10
-	BCC.L cv270
+	BCC.L cv274
 	; 		s1 = s1 - 10
 	SEC
 	SBC #10
@@ -10736,15 +10764,15 @@ cv269:
 	; 		s0 = s0 + 1
 	INC cvb_S0
 	; 	WEND
-	JMP cv269
-cv270:
+	JMP cv273
+cv274:
 	; 	IF s0 > 9 THEN s0 = 9
 	LDA cvb_S0
 	CMP #10
-	BCC.L cv271
+	BCC.L cv275
 	LDA #9
 	STA cvb_S0
-cv271:
+cv275:
 	; 	GOSUB update_score
 	JSR cvb_UPDATE_SCORE
 	; 	END
@@ -10755,10 +10783,10 @@ cvb_UPDATE_LIVES:
 	; 	IF li > 9 THEN li = 9
 	LDA cvb_LI
 	CMP #10
-	BCC.L cv272
+	BCC.L cv276
 	LDA #9
 	STA cvb_LI
-cv272:
+cv276:
 	; 	SPRITE 40,16,$30,li * 2 + 192,0
 	LDA #40
 	PHA
@@ -10832,7 +10860,7 @@ cvb_AIM_8DIR:
 	SBC temp
 	TYA
 	SBC temp+1
-	BCS.L cv273
+	BCS.L cv277
 	; 		tbvy = 0
 	LDA #0
 	STA cvb_TBVY
@@ -10848,7 +10876,7 @@ cvb_AIM_8DIR:
 	SBC #0
 	TYA
 	SBC #128
-	BCS.L cv274
+	BCS.L cv278
 	; 			tbvx = 0 - ebspd
 	LDA #0
 	TAY
@@ -10861,16 +10889,16 @@ cvb_AIM_8DIR:
 	TXA
 	STA cvb_TBVX
 	; 		ELSE
-	JMP cv275
-cv274:
+	JMP cv279
+cv278:
 	; 			tbvx = ebspd
 	LDA cvb_EBSPD
 	STA cvb_TBVX
 	; 		END IF
-cv275:
+cv279:
 	; 	ELSEIF #t1 + #t1 < #t2 THEN	' vertical dominante
-	JMP cv276
-cv273:
+	JMP cv280
+cv277:
 	LDA cvb_#T1
 	LDY cvb_#T1+1
 	CLC
@@ -10904,7 +10932,7 @@ cv273:
 	SBC temp
 	TYA
 	SBC temp+1
-	BCS.L cv277
+	BCS.L cv281
 	; 		tbvx = 0
 	LDA #0
 	STA cvb_TBVX
@@ -10920,7 +10948,7 @@ cv273:
 	SBC #0
 	TYA
 	SBC #128
-	BCS.L cv278
+	BCS.L cv282
 	; 			tbvy = 0 - ebspd
 	LDA #0
 	TAY
@@ -10933,16 +10961,16 @@ cv273:
 	TXA
 	STA cvb_TBVY
 	; 		ELSE
-	JMP cv279
-cv278:
+	JMP cv283
+cv282:
 	; 			tbvy = ebspd
 	LDA cvb_EBSPD
 	STA cvb_TBVY
 	; 		END IF
-cv279:
+cv283:
 	; 	ELSE					' diagonal
-	JMP cv276
-cv277:
+	JMP cv280
+cv281:
 	; 		#tw = ebspd * 11 / 16
 	LDA cvb_EBSPD
 	LDY #0
@@ -10970,7 +10998,7 @@ cv277:
 	SBC #0
 	TYA
 	SBC #128
-	BCS.L cv280
+	BCS.L cv284
 	; 			tbvx = 0 - #tw
 	LDA #0
 	TAY
@@ -10983,13 +11011,13 @@ cv277:
 	TXA
 	STA cvb_TBVX
 	; 		ELSE
-	JMP cv281
-cv280:
+	JMP cv285
+cv284:
 	; 			tbvx = #tw
 	LDA cvb_#TW
 	STA cvb_TBVX
 	; 		END IF
-cv281:
+cv285:
 	; 		IF #ady < 0 THEN
 	LDA cvb_#ADY
 	LDY cvb_#ADY+1
@@ -11002,7 +11030,7 @@ cv281:
 	SBC #0
 	TYA
 	SBC #128
-	BCS.L cv282
+	BCS.L cv286
 	; 			tbvy = 0 - #tw
 	LDA #0
 	TAY
@@ -11015,15 +11043,15 @@ cv281:
 	TXA
 	STA cvb_TBVY
 	; 		ELSE
-	JMP cv283
-cv282:
+	JMP cv287
+cv286:
 	; 			tbvy = #tw
 	LDA cvb_#TW
 	STA cvb_TBVY
 	; 		END IF
-cv283:
+cv287:
 	; 	END IF
-cv276:
+cv280:
 	; 	END
 	RTS
 	; 
@@ -11039,10 +11067,10 @@ cvb_EB_SPAWN:
 	LDA #0
 	STA cvb_K
 	; 	WHILE k < 8
-cv284:
+cv288:
 	LDA cvb_K
 	CMP #8
-	BCS.L cv285
+	BCS.L cv289
 	; 		IF eba(k) = 0 THEN
 	LDA #array_EBA
 	CLC
@@ -11054,7 +11082,7 @@ cv284:
 	TXA
 	JSR _peek8
 	CMP #0
-	BNE.L cv286
+	BNE.L cv290
 	; 			eba(k) = 1
 	LDA pointer
 	LDY pointer+1
@@ -11080,9 +11108,9 @@ cv284:
 	; 			IF ebs = 1 THEN nsm = nsm + 1
 	LDA cvb_EBS
 	CMP #1
-	BNE.L cv287
+	BNE.L cv291
 	INC cvb_NSM
-cv287:
+cv291:
 	; 			#tw = (#tbx + 256) * 16
 	LDA cvb_#TBX
 	LDY cvb_#TBX+1
@@ -11195,15 +11223,15 @@ cv287:
 	LDA #8
 	STA cvb_K
 	; 		ELSE
-	JMP cv288
-cv286:
+	JMP cv292
+cv290:
 	; 			k = k + 1
 	INC cvb_K
 	; 		END IF
-cv288:
+cv292:
 	; 	WEND
-	JMP cv284
-cv285:
+	JMP cv288
+cv289:
 	; 	END
 	RTS
 	; 
@@ -11212,10 +11240,10 @@ cvb_SPAWN_RING:
 	; 	FOR i = 0 TO 7
 	LDA #0
 	STA cvb_I
-cv289:
+cv293:
 	; 		IF i = 0 THEN
 	LDA cvb_I
-	BNE.L cv290
+	BNE.L cv294
 	; 			tbvx = 24
 	LDA #24
 	STA cvb_TBVX
@@ -11223,22 +11251,22 @@ cv289:
 	LDA #0
 	STA cvb_TBVY
 	; 		ELSEIF i = 1 THEN
-	JMP cv291
-cv290:
+	JMP cv295
+cv294:
 	LDA cvb_I
 	CMP #1
-	BNE.L cv292
+	BNE.L cv296
 	; 			tbvx = 17
 	LDA #17
 	STA cvb_TBVX
 	; 			tbvy = 17
 	STA cvb_TBVY
 	; 		ELSEIF i = 2 THEN
-	JMP cv291
-cv292:
+	JMP cv295
+cv296:
 	LDA cvb_I
 	CMP #2
-	BNE.L cv293
+	BNE.L cv297
 	; 			tbvx = 0
 	LDA #0
 	STA cvb_TBVX
@@ -11246,11 +11274,11 @@ cv292:
 	LDA #24
 	STA cvb_TBVY
 	; 		ELSEIF i = 3 THEN
-	JMP cv291
-cv293:
+	JMP cv295
+cv297:
 	LDA cvb_I
 	CMP #3
-	BNE.L cv294
+	BNE.L cv298
 	; 			tbvx = -17
 	LDA #239
 	STA cvb_TBVX
@@ -11258,11 +11286,11 @@ cv293:
 	LDA #17
 	STA cvb_TBVY
 	; 		ELSEIF i = 4 THEN
-	JMP cv291
-cv294:
+	JMP cv295
+cv298:
 	LDA cvb_I
 	CMP #4
-	BNE.L cv295
+	BNE.L cv299
 	; 			tbvx = -24
 	LDA #232
 	STA cvb_TBVX
@@ -11270,22 +11298,22 @@ cv294:
 	LDA #0
 	STA cvb_TBVY
 	; 		ELSEIF i = 5 THEN
-	JMP cv291
-cv295:
+	JMP cv295
+cv299:
 	LDA cvb_I
 	CMP #5
-	BNE.L cv296
+	BNE.L cv300
 	; 			tbvx = -17
 	LDA #239
 	STA cvb_TBVX
 	; 			tbvy = -17
 	STA cvb_TBVY
 	; 		ELSEIF i = 6 THEN
-	JMP cv291
-cv296:
+	JMP cv295
+cv300:
 	LDA cvb_I
 	CMP #6
-	BNE.L cv297
+	BNE.L cv301
 	; 			tbvx = 0
 	LDA #0
 	STA cvb_TBVX
@@ -11293,8 +11321,8 @@ cv296:
 	LDA #232
 	STA cvb_TBVY
 	; 		ELSE
-	JMP cv291
-cv297:
+	JMP cv295
+cv301:
 	; 			tbvx = 17
 	LDA #17
 	STA cvb_TBVX
@@ -11302,7 +11330,7 @@ cv297:
 	LDA #239
 	STA cvb_TBVY
 	; 		END IF
-cv291:
+cv295:
 	; 		ebs = 0
 	LDA #0
 	STA cvb_EBS
@@ -11312,7 +11340,7 @@ cv291:
 	INC cvb_I
 	LDA cvb_I
 	CMP #8
-	BCC.L cv289
+	BCC.L cv293
 	; 	END
 	RTS
 	; 
@@ -11529,7 +11557,7 @@ cvb_SKY_CLEAR_LOOP:
 	; 	FOR i = 0 TO 15
 	LDA #0
 	STA cvb_I
-cv298:
+cv302:
 	; 		VPOKE #bk, 0
 	LDA #0
 	PHA
@@ -11543,14 +11571,14 @@ cv298:
 	JSR WRTVRM
 	; 		#bk = #bk + 1
 	INC cvb_#BK
-	BNE cv299
+	BNE cv303
 	INC cvb_#BK+1
-cv299:
+cv303:
 	; 	NEXT i
 	INC cvb_I
 	LDA cvb_I
 	CMP #16
-	BCC.L cv298
+	BCC.L cv302
 	; 	WAIT
 	JSR wait
 	; 	gbc = gbc + 1
@@ -11558,9 +11586,9 @@ cv299:
 	; 	IF gbc < 60 THEN GOTO sky_clear_loop
 	LDA cvb_GBC
 	CMP #60
-	BCS.L cv300
+	BCS.L cv304
 	JMP cvb_SKY_CLEAR_LOOP
-cv300:
+cv304:
 	; 	END
 	RTS
 	; 
@@ -13841,66 +13869,6 @@ cvb_BOSS_ERASE:
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
-cv301:
-	; 		VPOKE #j,0
-	LDA #0
-	PHA
-	LDA cvb_#J
-	LDY cvb_#J+1
-	STA temp
-	STY temp+1
-	PLA
-	TAX
-	LDA temp
-	JSR WRTVRM
-	; 	NEXT #j
-	INC cvb_#J
-	BNE cv302
-	INC cvb_#J+1
-cv302:
-	LDA cvb_#J
-	LDY cvb_#J+1
-	SEC
-	SBC #111
-	TYA
-	SBC #32
-	BCC.L cv301
-	; 	FOR #j = $206F TO $2074
-	LDA #111
-	LDY #32
-	STA cvb_#J
-	STY cvb_#J+1
-cv303:
-	; 		VPOKE #j,0
-	LDA #0
-	PHA
-	LDA cvb_#J
-	LDY cvb_#J+1
-	STA temp
-	STY temp+1
-	PLA
-	TAX
-	LDA temp
-	JSR WRTVRM
-	; 	NEXT #j
-	INC cvb_#J
-	BNE cv304
-	INC cvb_#J+1
-cv304:
-	LDA cvb_#J
-	LDY cvb_#J+1
-	SEC
-	SBC #117
-	TYA
-	SBC #32
-	BCC.L cv303
-	; 	WAIT
-	JSR wait
-	; 	FOR #j = $2089 TO $208E
-	LDA #137
-	LDY #32
-	STA cvb_#J
-	STY cvb_#J+1
 cv305:
 	; 		VPOKE #j,0
 	LDA #0
@@ -13921,12 +13889,12 @@ cv306:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #143
+	SBC #111
 	TYA
 	SBC #32
 	BCC.L cv305
-	; 	FOR #j = $208F TO $2094
-	LDA #143
+	; 	FOR #j = $206F TO $2074
+	LDA #111
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -13950,14 +13918,14 @@ cv308:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #149
+	SBC #117
 	TYA
 	SBC #32
 	BCC.L cv307
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $20A9 TO $20AE
-	LDA #169
+	; 	FOR #j = $2089 TO $208E
+	LDA #137
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -13981,12 +13949,12 @@ cv310:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #175
+	SBC #143
 	TYA
 	SBC #32
 	BCC.L cv309
-	; 	FOR #j = $20AF TO $20B4
-	LDA #175
+	; 	FOR #j = $208F TO $2094
+	LDA #143
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14010,14 +13978,14 @@ cv312:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #181
+	SBC #149
 	TYA
 	SBC #32
 	BCC.L cv311
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $20C9 TO $20CE
-	LDA #201
+	; 	FOR #j = $20A9 TO $20AE
+	LDA #169
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14041,12 +14009,12 @@ cv314:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #207
+	SBC #175
 	TYA
 	SBC #32
 	BCC.L cv313
-	; 	FOR #j = $20CF TO $20D4
-	LDA #207
+	; 	FOR #j = $20AF TO $20B4
+	LDA #175
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14070,14 +14038,14 @@ cv316:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #213
+	SBC #181
 	TYA
 	SBC #32
 	BCC.L cv315
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $20E9 TO $20EE
-	LDA #233
+	; 	FOR #j = $20C9 TO $20CE
+	LDA #201
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14101,12 +14069,12 @@ cv318:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #239
+	SBC #207
 	TYA
 	SBC #32
 	BCC.L cv317
-	; 	FOR #j = $20EF TO $20F4
-	LDA #239
+	; 	FOR #j = $20CF TO $20D4
+	LDA #207
 	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14130,15 +14098,15 @@ cv320:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #245
+	SBC #213
 	TYA
 	SBC #32
 	BCC.L cv319
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $2109 TO $210E
-	LDA #9
-	LDY #33
+	; 	FOR #j = $20E9 TO $20EE
+	LDA #233
+	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
 cv321:
@@ -14161,13 +14129,13 @@ cv322:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #15
+	SBC #239
 	TYA
-	SBC #33
+	SBC #32
 	BCC.L cv321
-	; 	FOR #j = $210F TO $2114
-	LDA #15
-	LDY #33
+	; 	FOR #j = $20EF TO $20F4
+	LDA #239
+	LDY #32
 	STA cvb_#J
 	STY cvb_#J+1
 cv323:
@@ -14190,14 +14158,14 @@ cv324:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #21
+	SBC #245
 	TYA
-	SBC #33
+	SBC #32
 	BCC.L cv323
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $2129 TO $212E
-	LDA #41
+	; 	FOR #j = $2109 TO $210E
+	LDA #9
 	LDY #33
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14221,12 +14189,12 @@ cv326:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #47
+	SBC #15
 	TYA
 	SBC #33
 	BCC.L cv325
-	; 	FOR #j = $212F TO $2134
-	LDA #47
+	; 	FOR #j = $210F TO $2114
+	LDA #15
 	LDY #33
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14250,14 +14218,14 @@ cv328:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #53
+	SBC #21
 	TYA
 	SBC #33
 	BCC.L cv327
 	; 	WAIT
 	JSR wait
-	; 	FOR #j = $2149 TO $214E
-	LDA #73
+	; 	FOR #j = $2129 TO $212E
+	LDA #41
 	LDY #33
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14281,12 +14249,12 @@ cv330:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #79
+	SBC #47
 	TYA
 	SBC #33
 	BCC.L cv329
-	; 	FOR #j = $214F TO $2154
-	LDA #79
+	; 	FOR #j = $212F TO $2134
+	LDA #47
 	LDY #33
 	STA cvb_#J
 	STY cvb_#J+1
@@ -14310,10 +14278,70 @@ cv332:
 	LDA cvb_#J
 	LDY cvb_#J+1
 	SEC
-	SBC #85
+	SBC #53
 	TYA
 	SBC #33
 	BCC.L cv331
+	; 	WAIT
+	JSR wait
+	; 	FOR #j = $2149 TO $214E
+	LDA #73
+	LDY #33
+	STA cvb_#J
+	STY cvb_#J+1
+cv333:
+	; 		VPOKE #j,0
+	LDA #0
+	PHA
+	LDA cvb_#J
+	LDY cvb_#J+1
+	STA temp
+	STY temp+1
+	PLA
+	TAX
+	LDA temp
+	JSR WRTVRM
+	; 	NEXT #j
+	INC cvb_#J
+	BNE cv334
+	INC cvb_#J+1
+cv334:
+	LDA cvb_#J
+	LDY cvb_#J+1
+	SEC
+	SBC #79
+	TYA
+	SBC #33
+	BCC.L cv333
+	; 	FOR #j = $214F TO $2154
+	LDA #79
+	LDY #33
+	STA cvb_#J
+	STY cvb_#J+1
+cv335:
+	; 		VPOKE #j,0
+	LDA #0
+	PHA
+	LDA cvb_#J
+	LDY cvb_#J+1
+	STA temp
+	STY temp+1
+	PLA
+	TAX
+	LDA temp
+	JSR WRTVRM
+	; 	NEXT #j
+	INC cvb_#J
+	BNE cv336
+	INC cvb_#J+1
+cv336:
+	LDA cvb_#J
+	LDY cvb_#J+1
+	SEC
+	SBC #85
+	TYA
+	SBC #33
+	BCC.L cv335
 	; 	WAIT
 	JSR wait
 	; 	VPOKE $23C2,0
@@ -14630,11 +14658,11 @@ cvb_BOSS_KILL:
 	LDA cvb_FASE
 	AND #1
 	CMP #1
-	BNE.L cv333
+	BNE.L cv337
 	; 		GOSUB stars_fill	' devolve as estrelas ao cenario
 	JSR cvb_STARS_FILL
 	; 	END IF
-cv333:
+cv337:
 	; 	bsc = 70			' v0.19: cerimonia (estrobo+estouros) p/ transicao
 	LDA #70
 	STA cvb_BSC
@@ -14666,7 +14694,7 @@ cvb_MB_KILL:
 	; 	FOR i = 41 TO 48
 	LDA #41
 	STA cvb_I
-cv334:
+cv338:
 	; 		SPRITE i,$f0,0,0,0
 	LDA cvb_I
 	PHA
@@ -14682,11 +14710,11 @@ cv334:
 	INC cvb_I
 	LDA cvb_I
 	CMP #49
-	BCC.L cv334
+	BCC.L cv338
 	; 	FOR i = 57 TO 60	' laser do miniboss (v0.12)
 	LDA #57
 	STA cvb_I
-cv335:
+cv339:
 	; 		SPRITE i,$f0,0,0,0
 	LDA cvb_I
 	PHA
@@ -14702,7 +14730,7 @@ cv335:
 	INC cvb_I
 	LDA cvb_I
 	CMP #61
-	BCC.L cv335
+	BCC.L cv339
 	; 	VPOKE $3F19,$19		' restaura pal2 (verde da chama/shards)
 	LDA #25
 	PHA
@@ -14781,7 +14809,7 @@ cvb_MB_FRAME:
 	; 		IF mbs = 1 THEN
 	LDA cvb_MBS
 	CMP #1
-	BNE.L cv336
+	BNE.L cv340
 	; 			' descendo ate UM POUCO ACIMA do meio da tela (v0.12: era y=100)
 	; 			#mby = #mby + 16
 	LDA cvb_#MBY
@@ -14800,40 +14828,40 @@ cvb_MB_FRAME:
 	SBC #128
 	TYA
 	SBC #20
-	BCC.L cv337
+	BCC.L cv341
 	LDA #2
 	STA cvb_MBS
-cv337:
+cv341:
 	; 		ELSE
-	JMP cv338
-cv336:
+	JMP cv342
+cv340:
 	; 			' patrulha esquerda/direita (1 px/frame, inverte nas margens)
 	; 			IF mbdir = 0 THEN
 	LDA cvb_MBDIR
-	BNE.L cv339
+	BNE.L cv343
 	; 				mbx = mbx + 1
 	INC cvb_MBX
 	; 				IF mbx >= 200 THEN mbdir = 1
 	LDA cvb_MBX
 	CMP #200
-	BCC.L cv340
+	BCC.L cv344
 	LDA #1
 	STA cvb_MBDIR
-cv340:
+cv344:
 	; 			ELSE
-	JMP cv341
-cv339:
+	JMP cv345
+cv343:
 	; 				mbx = mbx - 1
 	DEC cvb_MBX
 	; 				IF mbx <= 16 THEN mbdir = 0
 	LDA cvb_MBX
 	CMP #17
-	BCS.L cv342
+	BCS.L cv346
 	LDA #0
 	STA cvb_MBDIR
-cv342:
+cv346:
 	; 			END IF
-cv341:
+cv345:
 	; 			' v0.14: laser em 3 pontos do passeio (pedido do Saulo):
 	; 			' centro exato (112) E os dois extremos (16/200)
 	; 			e2 = 0
@@ -14842,35 +14870,35 @@ cv341:
 	; 			IF mbx = 112 THEN e2 = 1
 	LDA cvb_MBX
 	CMP #112
-	BNE.L cv343
+	BNE.L cv347
 	LDA #1
 	STA cvb_E2
-cv343:
+cv347:
 	; 			IF mbx = 200 THEN e2 = 1
 	LDA cvb_MBX
 	CMP #200
-	BNE.L cv344
+	BNE.L cv348
 	LDA #1
 	STA cvb_E2
-cv344:
+cv348:
 	; 			IF mbx = 16 THEN e2 = 1
 	LDA cvb_MBX
 	CMP #16
-	BNE.L cv345
+	BNE.L cv349
 	LDA #1
 	STA cvb_E2
-cv345:
+cv349:
 	; 			IF mlr = 0 THEN
 	LDA cvb_MLR
-	BNE.L cv346
+	BNE.L cv350
 	; 				IF mbx <> mbxo THEN
 	LDA cvb_MBX
 	CMP cvb_MBXO
-	BEQ.L cv347
+	BEQ.L cv351
 	; 					IF e2 = 1 THEN
 	LDA cvb_E2
 	CMP #1
-	BNE.L cv348
+	BNE.L cv352
 	; 						mlr = 1
 	LDA #1
 	STA cvb_MLR
@@ -14905,11 +14933,11 @@ cv345:
 	STA cvb_#MLY
 	STY cvb_#MLY+1
 	; 					END IF
-cv348:
+cv352:
 	; 				END IF
-cv347:
+cv351:
 	; 			END IF
-cv346:
+cv350:
 	; 			mbxo = mbx
 	LDA cvb_MBX
 	STA cvb_MBXO
@@ -14918,12 +14946,12 @@ cv346:
 	; 			IF mbt > 0 THEN mbt = mbt - 1
 	LDA cvb_MBT
 	CMP #1
-	BCC.L cv349
+	BCC.L cv353
 	DEC cvb_MBT
-cv349:
+cv353:
 	; 			IF mbt = 0 THEN
 	LDA cvb_MBT
-	BNE.L cv350
+	BNE.L cv354
 	; 				e = eba(0) + eba(1) + eba(2) + eba(3) + eba(4) + eba(5) + eba(6) + eba(7)
 	LDA array_EBA+1
 	STA temp
@@ -14970,14 +14998,14 @@ cv349:
 	; 				IF e = 0 THEN
 	TAX
 	AND #128
-	BPL cv352
+	BPL cv356
 	LDA #255
-cv352:
+cv356:
 	TAY
 	TXA
 	STY temp
 	ORA temp
-	BNE.L cv351
+	BNE.L cv355
 	; 					#tbx = mbx + 16
 	LDA cvb_MBX
 	LDY #0
@@ -15008,11 +15036,11 @@ cv352:
 	LDA #150
 	STA cvb_MBT
 	; 				END IF
-cv351:
+cv355:
 	; 			END IF
-cv350:
+cv354:
 	; 		END IF
-cv338:
+cv342:
 	; 		IF #mby < 4112 THEN
 	LDA cvb_#MBY
 	LDY cvb_#MBY+1
@@ -15020,11 +15048,11 @@ cv338:
 	SBC #16
 	TYA
 	SBC #16
-	BCS.L cv353
+	BCS.L cv357
 	; 			FOR c = 41 TO 48	' ainda entrando: escondido
 	LDA #41
 	STA cvb_C
-cv354:
+cv358:
 	; 				SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -15040,10 +15068,10 @@ cv354:
 	INC cvb_C
 	LDA cvb_C
 	CMP #49
-	BCC.L cv354
+	BCC.L cv358
 	; 		ELSE
-	JMP cv355
-cv353:
+	JMP cv359
+cv357:
 	; 			' desenha: 2 frames animados (bases 141/157); reuse dos slots
 	; 			' 41-48 do enemy4 (eles NUNCA coexistem: ondas exclusivas)
 	; 			d = (FRAME / 8) AND 1
@@ -15075,7 +15103,7 @@ cv353:
 	; 			FOR c = 41 TO 44
 	LDA #41
 	STA cvb_C
-cv356:
+cv360:
 	; 				SPRITE c,yc - 1,e,d,2
 	LDA cvb_C
 	PHA
@@ -15103,14 +15131,14 @@ cv356:
 	INC cvb_C
 	LDA cvb_C
 	CMP #45
-	BCC.L cv356
+	BCC.L cv360
 	; 			e = mbx
 	LDA cvb_MBX
 	STA cvb_E
 	; 			FOR c = 45 TO 48
 	LDA #45
 	STA cvb_C
-cv357:
+cv361:
 	; 				SPRITE c,yc + 15,e,d,2
 	LDA cvb_C
 	PHA
@@ -15138,26 +15166,26 @@ cv357:
 	INC cvb_C
 	LDA cvb_C
 	CMP #49
-	BCC.L cv357
+	BCC.L cv361
 	; 		END IF
-cv355:
+cv359:
 	; 		' Encostou na nave? (colisao = 1 tiro de dano no miniboss tambem)
 	; 		IF ded = 0 AND inv = 0 THEN
 	LDA cvb_INV
-	BEQ cv359
+	BEQ cv363
 	LDA #0
 	DB $2c
-cv359:
+cv363:
 	LDA #255
 	STA temp
 	LDA cvb_DED
-	BEQ cv360
+	BEQ cv364
 	LDA #0
 	DB $2c
-cv360:
+cv364:
 	LDA #255
 	AND temp
-	BEQ.L cv358
+	BEQ.L cv362
 	; 			IF #mby >= 4112 THEN
 	LDA cvb_#MBY
 	LDY cvb_#MBY+1
@@ -15165,7 +15193,7 @@ cv360:
 	SBC #16
 	TYA
 	SBC #16
-	BCC.L cv361
+	BCC.L cv365
 	; 				#c1 = px
 	LDA cvb_PX
 	LDY #0
@@ -15197,7 +15225,7 @@ cv360:
 	SBC #20
 	TYA
 	SBC #0
-	BCS.L cv362
+	BCS.L cv366
 	; 					#c2 = py
 	LDA cvb_PY
 	LDY #0
@@ -15229,31 +15257,31 @@ cv360:
 	SBC #20
 	TYA
 	SBC #0
-	BCS.L cv363
+	BCS.L cv367
 	; 						mbhp = mbhp - 1
 	DEC cvb_MBHP
 	; 						IF mbhp = 0 THEN GOSUB mb_kill
 	LDA cvb_MBHP
-	BNE.L cv364
+	BNE.L cv368
 	JSR cvb_MB_KILL
-cv364:
+cv368:
 	; 						diek = 1: RETURN		' v0.15: era GOTO player_dies (fora de proc nao pode!)
 	LDA #1
 	STA cvb_DIEK
 	RTS
 	; 					END IF
-cv363:
+cv367:
 	; 				END IF
-cv362:
+cv366:
 	; 			END IF
-cv361:
+cv365:
 	; 		END IF
-cv358:
+cv362:
 	; 		' Levou tiro?
 	; 		FOR d = 0 TO 4
 	LDA #0
 	STA cvb_D
-cv365:
+cv369:
 	; 			IF bty(d) <> 0 THEN
 	LDA #array_BTY
 	CLC
@@ -15265,7 +15293,7 @@ cv365:
 	TXA
 	JSR _peek8
 	CMP #0
-	BEQ.L cv366
+	BEQ.L cv370
 	; 				IF btx(d) + 6 > mbx AND btx(d) < mbx + 26 THEN
 	LDA cvb_MBX
 	LDY #0
@@ -15330,7 +15358,7 @@ cv365:
 	STA temp
 	PLA
 	AND temp
-	BEQ.L cv367
+	BEQ.L cv371
 	; 					IF bty(d) + 8 > yc AND bty(d) < yc + 32 THEN
 	LDA cvb_YC
 	LDY #0
@@ -15395,7 +15423,7 @@ cv365:
 	STA temp
 	PLA
 	AND temp
-	BEQ.L cv368
+	BEQ.L cv372
 	; 						bty(d) = 0
 	LDA pointer
 	LDY pointer+1
@@ -15453,28 +15481,28 @@ cv365:
 	STY cvb_#POP+1
 	; 					IF mbhp = 0 THEN GOSUB mb_kill
 	LDA cvb_MBHP
-	BNE.L cv369
+	BNE.L cv373
 	JSR cvb_MB_KILL
-cv369:
+cv373:
 	; 					d = 5
 	LDA #5
 	STA cvb_D
 	; 				END IF
-cv368:
+cv372:
 	; 			END IF
-cv367:
+cv371:
 	; 		END IF
-cv366:
+cv370:
 	; 	NEXT d
 	INC cvb_D
 	LDA cvb_D
 	CMP #5
-	BCC.L cv365
+	BCC.L cv369
 	; 	' --- Laser do miniboss (v0.12: arte laser.png do Saulo, 16x32) ---
 	; 	IF mlr THEN
 	LDA cvb_MLR
 	CMP #0
-	BEQ.L cv370
+	BEQ.L cv374
 	; 		#mly = #mly + 96	' desce rapido: 6 px/frame
 	LDA cvb_#MLY
 	LDY cvb_#MLY+1
@@ -15492,14 +15520,14 @@ cv366:
 	SBC #128
 	TYA
 	SBC #30
-	BCC.L cv371
+	BCC.L cv375
 	LDA #0
 	STA cvb_MLR
-cv371:
+cv375:
 	; 		IF mlr THEN
 	LDA cvb_MLR
 	CMP #0
-	BEQ.L cv372
+	BEQ.L cv376
 	; 			ly = (#mly / 16) - 256
 	LDA cvb_#MLY
 	LDY cvb_#MLY+1
@@ -15577,20 +15605,20 @@ cv371:
 	JSR update_sprite
 	; 			IF ded = 0 AND inv = 0 THEN
 	LDA cvb_INV
-	BEQ cv374
+	BEQ cv378
 	LDA #0
 	DB $2c
-cv374:
+cv378:
 	LDA #255
 	STA temp
 	LDA cvb_DED
-	BEQ cv375
+	BEQ cv379
 	LDA #0
 	DB $2c
-cv375:
+cv379:
 	LDA #255
 	AND temp
-	BEQ.L cv373
+	BEQ.L cv377
 	; 				#c1 = px
 	LDA cvb_PX
 	LDY #0
@@ -15622,7 +15650,7 @@ cv375:
 	SBC #10
 	TYA
 	SBC #0
-	BCS.L cv376
+	BCS.L cv380
 	; 					#c2 = py
 	LDA cvb_PY
 	LDY #0
@@ -15654,26 +15682,26 @@ cv375:
 	SBC #20
 	TYA
 	SBC #0
-	BCS.L cv377
+	BCS.L cv381
 	; 						diek = 1: RETURN		' v0.15: era GOTO player_dies (fora de proc nao pode!)
 	LDA #1
 	STA cvb_DIEK
 	RTS
 	; 					END IF
-cv377:
+cv381:
 	; 				END IF
-cv376:
+cv380:
 	; 			END IF
-cv373:
+cv377:
 	; 		END IF
-cv372:
+cv376:
 	; 	ELSE
-	JMP cv378
-cv370:
+	JMP cv382
+cv374:
 	; 		FOR c = 57 TO 60	' laser apagado: esconde (so nesta onda)
 	LDA #57
 	STA cvb_C
-cv379:
+cv383:
 	; 			SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -15689,9 +15717,9 @@ cv379:
 	INC cvb_C
 	LDA cvb_C
 	CMP #61
-	BCC.L cv379
+	BCC.L cv383
 	; 	END IF
-cv378:
+cv382:
 	; 	END
 	RTS
 	; 
@@ -15701,12 +15729,12 @@ cvb_BOSS_FRAME:
 	; 		IF bsph = 1 THEN
 	LDA cvb_BSPH
 	CMP #1
-	BNE.L cv380
+	BNE.L cv384
 	; 			bst = bst - 1
 	DEC cvb_BST
 	; 			IF bst = 0 THEN
 	LDA cvb_BST
-	BNE.L cv381
+	BNE.L cv385
 	; 				e = eba(0) + eba(1) + eba(2) + eba(3) + eba(4) + eba(5) + eba(6) + eba(7)
 	LDA array_EBA+1
 	STA temp
@@ -15753,9 +15781,9 @@ cvb_BOSS_FRAME:
 	; 				IF e < 5 THEN			' trava anti-slowdown (pool de 8)
 	TAX
 	AND #128
-	BPL cv383
+	BPL cv387
 	LDA #255
-cv383:
+cv387:
 	TAY
 	TXA
 	TAX
@@ -15767,7 +15795,7 @@ cv383:
 	SBC #5
 	TYA
 	SBC #128
-	BCS.L cv382
+	BCS.L cv386
 	; 					#tbx = 84 + #bo		' asas acompanham o balanco
 	LDA cvb_#BO
 	LDY cvb_#BO+1
@@ -15782,7 +15810,7 @@ cv383:
 	STY cvb_#TBX+1
 	; 					IF bshw <> 0 THEN
 	LDA cvb_BSHW
-	BEQ.L cv384
+	BEQ.L cv388
 	; 						#tbx = 156 + #bo	' (16-bit c/ sinal: asa dir >127!)
 	LDA cvb_#BO
 	LDY cvb_#BO+1
@@ -15796,7 +15824,7 @@ cv383:
 	STA cvb_#TBX
 	STY cvb_#TBX+1
 	; 					END IF
-cv384:
+cv388:
 	; 					#tby = 80
 	LDA #80
 	LDY #0
@@ -15847,7 +15875,7 @@ cv384:
 	; 					IF bsn >= 8 THEN
 	LDA cvb_BSN
 	CMP #8
-	BCC.L cv385
+	BCC.L cv389
 	; 						bsph = 2
 	LDA #2
 	STA cvb_BSPH
@@ -15858,29 +15886,29 @@ cv384:
 	LDA #20
 	STA cvb_BST
 	; 					END IF
-cv385:
+cv389:
 	; 				ELSE
-	JMP cv386
-cv382:
+	JMP cv390
+cv386:
 	; 					bst = 10			' pool cheio: remarca
 	LDA #10
 	STA cvb_BST
 	; 				END IF
-cv386:
+cv390:
 	; 			END IF
-cv381:
+cv385:
 	; 		ELSE
-	JMP cv387
-cv380:
+	JMP cv391
+cv384:
 	; 			IF bsph = 2 THEN
 	LDA cvb_BSPH
 	CMP #2
-	BNE.L cv388
+	BNE.L cv392
 	; 				bst = bst - 1
 	DEC cvb_BST
 	; 				IF bst = 0 THEN
 	LDA cvb_BST
-	BNE.L cv389
+	BNE.L cv393
 	; 					e = eba(0) + eba(1) + eba(2) + eba(3) + eba(4) + eba(5) + eba(6) + eba(7)
 	LDA array_EBA+1
 	STA temp
@@ -15927,9 +15955,9 @@ cv380:
 	; 					IF e < 8 THEN
 	TAX
 	AND #128
-	BPL cv391
+	BPL cv395
 	LDA #255
-cv391:
+cv395:
 	TAY
 	TXA
 	TAX
@@ -15941,7 +15969,7 @@ cv391:
 	SBC #8
 	TYA
 	SBC #128
-	BCS.L cv390
+	BCS.L cv394
 	; 						#tbx = 88 + RANDOM(64)	' diferentes locais...
 	JSR random
 	AND #63
@@ -15996,7 +16024,7 @@ cv391:
 	; 						IF bsn >= 20 THEN
 	LDA cvb_BSN
 	CMP #20
-	BCC.L cv392
+	BCC.L cv396
 	; 							bsph = 3
 	LDA #3
 	STA cvb_BSPH
@@ -16007,28 +16035,28 @@ cv391:
 	LDA #30
 	STA cvb_BST
 	; 						END IF
-cv392:
+cv396:
 	; 					ELSE
-	JMP cv393
-cv390:
+	JMP cv397
+cv394:
 	; 						bst = 6
 	LDA #6
 	STA cvb_BST
 	; 					END IF
-cv393:
+cv397:
 	; 				END IF
-cv389:
+cv393:
 	; 			ELSE
-	JMP cv394
-cv388:
+	JMP cv398
+cv392:
 	; 				bst = bst - 1
 	DEC cvb_BST
 	; 				IF bst = 0 THEN
 	LDA cvb_BST
-	BNE.L cv395
+	BNE.L cv399
 	; 					IF bol = 0 THEN
 	LDA cvb_BOL
-	BNE.L cv396
+	BNE.L cv400
 	; 						bol = 1
 	LDA #1
 	STA cvb_BOL
@@ -16042,7 +16070,7 @@ cv388:
 	; 						IF bsn >= 3 THEN
 	LDA cvb_BSN
 	CMP #3
-	BCC.L cv397
+	BCC.L cv401
 	; 							bsph = 1			' repete o ciclo
 	LDA #1
 	STA cvb_BSPH
@@ -16053,32 +16081,32 @@ cv388:
 	LDA #90
 	STA cvb_BST
 	; 						ELSE
-	JMP cv398
-cv397:
+	JMP cv402
+cv401:
 	; 							bst = 50
 	LDA #50
 	STA cvb_BST
 	; 						END IF
-cv398:
+cv402:
 	; 					ELSE
-	JMP cv399
-cv396:
+	JMP cv403
+cv400:
 	; 						bst = 8			' espera o laser sair da tela
 	LDA #8
 	STA cvb_BST
 	; 					END IF
-cv399:
+cv403:
 	; 				END IF
-cv395:
+cv399:
 	; 			END IF
-cv394:
+cv398:
 	; 		END IF
-cv387:
+cv391:
 	; 		' laser do boss (do meio dele; arte laser.png, metade 16x16)
 	; 		IF bol THEN
 	LDA cvb_BOL
 	CMP #0
-	BEQ.L cv400
+	BEQ.L cv404
 	; 			#boy = #boy + 96	' desce rapido: 6 px/frame
 	LDA cvb_#BOY
 	LDY cvb_#BOY+1
@@ -16096,14 +16124,14 @@ cv387:
 	SBC #128
 	TYA
 	SBC #30
-	BCC.L cv401
+	BCC.L cv405
 	LDA #0
 	STA cvb_BOL
-cv401:
+cv405:
 	; 			IF bol THEN
 	LDA cvb_BOL
 	CMP #0
-	BEQ.L cv402
+	BEQ.L cv406
 	; 				ly = (#boy / 16) - 256
 	LDA cvb_#BOY
 	LDY cvb_#BOY+1
@@ -16162,20 +16190,20 @@ cv401:
 	STA cvb_E
 	; 				IF ded = 0 AND inv = 0 THEN
 	LDA cvb_INV
-	BEQ cv404
+	BEQ cv408
 	LDA #0
 	DB $2c
-cv404:
+cv408:
 	LDA #255
 	STA temp
 	LDA cvb_DED
-	BEQ cv405
+	BEQ cv409
 	LDA #0
 	DB $2c
-cv405:
+cv409:
 	LDA #255
 	AND temp
-	BEQ.L cv403
+	BEQ.L cv407
 	; 					#c1 = px
 	LDA cvb_PX
 	LDY #0
@@ -16188,9 +16216,9 @@ cv405:
 	LDA cvb_E
 	TAX
 	AND #128
-	BPL cv406
+	BPL cv410
 	LDA #255
-cv406:
+cv410:
 	TAY
 	TXA
 	STA temp
@@ -16213,7 +16241,7 @@ cv406:
 	SBC #10
 	TYA
 	SBC #0
-	BCS.L cv407
+	BCS.L cv411
 	; 						#c2 = py
 	LDA cvb_PY
 	LDY #0
@@ -16245,22 +16273,22 @@ cv406:
 	SBC #14
 	TYA
 	SBC #0
-	BCS.L cv408
+	BCS.L cv412
 	; 							diek = 1: RETURN		' v0.15: era GOTO player_dies (fora de proc nao pode!)
 	LDA #1
 	STA cvb_DIEK
 	RTS
 	; 						END IF
-cv408:
+cv412:
 	; 					END IF
-cv407:
+cv411:
 	; 				END IF
-cv403:
+cv407:
 	; 			END IF
-cv402:
+cv406:
 	; 		ELSE
-	JMP cv409
-cv400:
+	JMP cv413
+cv404:
 	; 			SPRITE 61,$f0,0,0,0
 	LDA #61
 	PHA
@@ -16284,7 +16312,7 @@ cv400:
 	PLA
 	JSR update_sprite
 	; 		END IF
-cv409:
+cv413:
 	; 		' Encostou na nave? (boss 96x64 no alto: caixa 72..167 x 24..88)
 	; 		e = 120 + boff
 	LDA cvb_BOFF
@@ -16293,20 +16321,20 @@ cv409:
 	STA cvb_E
 	; 		IF ded = 0 AND inv = 0 THEN
 	LDA cvb_INV
-	BEQ cv411
+	BEQ cv415
 	LDA #0
 	DB $2c
-cv411:
+cv415:
 	LDA #255
 	STA temp
 	LDA cvb_DED
-	BEQ cv412
+	BEQ cv416
 	LDA #0
 	DB $2c
-cv412:
+cv416:
 	LDA #255
 	AND temp
-	BEQ.L cv410
+	BEQ.L cv414
 	; 			#c1 = px
 	LDA cvb_PX
 	LDY #0
@@ -16329,9 +16357,9 @@ cv412:
 	LDA cvb_E
 	TAX
 	AND #128
-	BPL cv413
+	BPL cv417
 	LDA #255
-cv413:
+cv417:
 	TAY
 	TXA
 	STA temp
@@ -16354,7 +16382,7 @@ cv413:
 	SBC #52
 	TYA
 	SBC #0
-	BCS.L cv414
+	BCS.L cv418
 	; 				#c2 = py
 	LDA cvb_PY
 	LDY #0
@@ -16376,22 +16404,22 @@ cv413:
 	SBC #36
 	TYA
 	SBC #0
-	BCS.L cv415
+	BCS.L cv419
 	; 					diek = 1: RETURN		' v0.15: era GOTO player_dies (fora de proc nao pode!)
 	LDA #1
 	STA cvb_DIEK
 	RTS
 	; 				END IF
-cv415:
+cv419:
 	; 			END IF
-cv414:
+cv418:
 	; 		END IF
-cv410:
+cv414:
 	; 		' Levou tiro?
 	; 		FOR d = 0 TO 4
 	LDA #0
 	STA cvb_D
-cv416:
+cv420:
 	; 			IF bty(d) <> 0 THEN
 	LDA #array_BTY
 	CLC
@@ -16403,7 +16431,7 @@ cv416:
 	TXA
 	JSR _peek8
 	CMP #0
-	BEQ.L cv417
+	BEQ.L cv421
 	; 				e = 72 + boff
 	LDA cvb_BOFF
 	CLC
@@ -16418,9 +16446,9 @@ cv416:
 	LDA cvb_E
 	TAX
 	AND #128
-	BPL cv419
+	BPL cv423
 	LDA #255
-cv419:
+cv423:
 	TAY
 	TXA
 	TAX
@@ -16474,7 +16502,7 @@ cv419:
 	STA temp
 	PLA
 	AND temp
-	BEQ.L cv418
+	BEQ.L cv422
 	; 					IF bty(d) + 8 > 24 AND bty(d) < 88 THEN
 	LDA #array_BTY
 	CLC
@@ -16508,7 +16536,7 @@ cv419:
 	ADC #0
 	EOR #255
 	AND temp
-	BEQ.L cv420
+	BEQ.L cv424
 	; 						bty(d) = 0
 	LDA pointer
 	LDY pointer+1
@@ -16566,23 +16594,23 @@ cv419:
 	STY cvb_#POP+1
 	; 						IF bshp = 0 THEN GOSUB boss_kill
 	LDA cvb_BSHP
-	BNE.L cv421
+	BNE.L cv425
 	JSR cvb_BOSS_KILL
-cv421:
+cv425:
 	; 						d = 5
 	LDA #5
 	STA cvb_D
 	; 					END IF
-cv420:
+cv424:
 	; 				END IF
-cv418:
+cv422:
 	; 			END IF
-cv417:
+cv421:
 	; 		NEXT d
 	INC cvb_D
 	LDA cvb_D
 	CMP #5
-	BCC.L cv416
+	BCC.L cv420
 	; 	END
 	RTS
 	; 
@@ -16617,13 +16645,13 @@ cvb_FALCON_SPLASH:
 	; 	FOR r = 0 TO 159
 	LDA #0
 	STA cvb_R
-cv422:
+cv426:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
 	; 		IF e THEN
 	CMP #0
-	BEQ.L cv423
+	BEQ.L cv427
 	; 			#tw = r / 16 + 9
 	LDA cvb_R
 	LDY #0
@@ -16695,12 +16723,12 @@ cv422:
 	LDA temp
 	JSR WRTVRM
 	; 		END IF
-cv423:
+cv427:
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #160
-	BCC.L cv422
+	BCC.L cv426
 	; 	RESTORE falcon_txt
 	LDA #cvb_FALCON_TXT
 	LDY #cvb_FALCON_TXT>>8
@@ -16709,7 +16737,7 @@ cv423:
 	; 	FOR r = 0 TO 8
 	LDA #0
 	STA cvb_R
-cv424:
+cv428:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -16734,7 +16762,7 @@ cv424:
 	INC cvb_R
 	LDA cvb_R
 	CMP #9
-	BCC.L cv424
+	BCC.L cv428
 	; 	VPOKE $3F00,$0F
 	LDA #15
 	PHA
@@ -16791,11 +16819,11 @@ cv424:
 	; 	FOR sk = 0 TO 1
 	LDA #0
 	STA cvb_SK
-cv425:
+cv429:
 	; 		FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv426:
+cv430:
 	; 			READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -16827,38 +16855,6 @@ cv426:
 	; 			FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv427:
-	; 				WAIT
-	JSR wait
-	; 				IF CONT1.KEY = 11 THEN GOTO fs_fim
-	LDA key1_data
-	CMP #11
-	BNE.L cv428
-	JMP cvb_FS_FIM
-cv428:
-	; 				IF CONT1.BUTTON THEN GOTO fs_fim
-	LDA joy1_data
-	AND #64
-	BEQ.L cv429
-	JMP cvb_FS_FIM
-cv429:
-	; 			NEXT q
-	INC cvb_Q
-	LDA cvb_Q
-	CMP #4
-	BCC.L cv427
-	; 		NEXT r
-	INC cvb_R
-	LDA cvb_R
-	CMP #7
-	BCC.L cv426
-	; 		IF sk = 0 THEN
-	LDA cvb_SK
-	BNE.L cv430
-	; 			' hold ~2.5s com a logo acesa
-	; 			FOR q = 0 TO 149
-	LDA #0
-	STA cvb_Q
 cv431:
 	; 				WAIT
 	JSR wait
@@ -16877,20 +16873,52 @@ cv433:
 	; 			NEXT q
 	INC cvb_Q
 	LDA cvb_Q
-	CMP #150
+	CMP #4
 	BCC.L cv431
+	; 		NEXT r
+	INC cvb_R
+	LDA cvb_R
+	CMP #7
+	BCC.L cv430
+	; 		IF sk = 0 THEN
+	LDA cvb_SK
+	BNE.L cv434
+	; 			' hold ~2.5s com a logo acesa
+	; 			FOR q = 0 TO 149
+	LDA #0
+	STA cvb_Q
+cv435:
+	; 				WAIT
+	JSR wait
+	; 				IF CONT1.KEY = 11 THEN GOTO fs_fim
+	LDA key1_data
+	CMP #11
+	BNE.L cv436
+	JMP cvb_FS_FIM
+cv436:
+	; 				IF CONT1.BUTTON THEN GOTO fs_fim
+	LDA joy1_data
+	AND #64
+	BEQ.L cv437
+	JMP cvb_FS_FIM
+cv437:
+	; 			NEXT q
+	INC cvb_Q
+	LDA cvb_Q
+	CMP #150
+	BCC.L cv435
 	; 			RESTORE fade_tbl_out
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
 	STA read_pointer
 	STY read_pointer+1
 	; 		END IF
-cv430:
+cv434:
 	; 	NEXT sk
 	INC cvb_SK
 	LDA cvb_SK
 	CMP #2
-	BCC.L cv425
+	BCC.L cv429
 	; fs_fim:
 cvb_FS_FIM:
 	; 	SCREEN DISABLE
@@ -16923,15 +16951,15 @@ cvb_SC_RELEASE:
 	; 	IF CONT1.KEY = 11 THEN GOTO sc_release
 	LDA key1_data
 	CMP #11
-	BNE.L cv434
+	BNE.L cv438
 	JMP cvb_SC_RELEASE
-cv434:
+cv438:
 	; 	IF CONT1.BUTTON THEN GOTO sc_release
 	LDA joy1_data
 	AND #64
-	BEQ.L cv435
+	BEQ.L cv439
 	JMP cvb_SC_RELEASE
-cv435:
+cv439:
 	; 	SCREEN DISABLE
 	JSR DISSCR
 	; 	CLS
@@ -16958,28 +16986,28 @@ cv435:
 	; 	IF fase = 1 THEN PRINT AT 514,"A CAMINHO DO PLANETA DE FOGO"
 	LDA cvb_FASE
 	CMP #1
-	BNE.L cv436
+	BNE.L cv440
 	JSR print_string_cursor_constant
 	DB $02,$02,$1c
 	DB $41,$20,$43,$41,$4d,$49,$4e,$48
 	DB $4f,$20,$44,$4f,$20,$50,$4c,$41
 	DB $4e,$45,$54,$41,$20,$44,$45,$20
 	DB $46,$4f,$47,$4f
-cv436:
+cv440:
 	; 	IF fase = 2 THEN PRINT AT 519,"O PLANETA DE FOGO"
 	LDA cvb_FASE
 	CMP #2
-	BNE.L cv437
+	BNE.L cv441
 	JSR print_string_cursor_constant
 	DB $07,$02,$11
 	DB $4f,$20,$50,$4c,$41,$4e,$45,$54
 	DB $41,$20,$44,$45,$20,$46,$4f,$47
 	DB $4f
-cv437:
+cv441:
 	; 	IF fase = 3 THEN
 	LDA cvb_FASE
 	CMP #3
-	BNE.L cv438
+	BNE.L cv442
 	; 		PRINT AT 516,"O CINTURAO DE ASTEROIDES"
 	JSR print_string_cursor_constant
 	DB $04,$02,$18
@@ -17009,28 +17037,28 @@ cv437:
 	LDA temp
 	JSR WRTVRM
 	; 	END IF
-cv438:
+cv442:
 	; 	IF fase = 4 THEN PRINT AT 512,"O GERADOR DE ESCUDOS DE ATLANTIS"
 	LDA cvb_FASE
 	CMP #4
-	BNE.L cv439
+	BNE.L cv443
 	JSR print_string_cursor_constant
 	DB $00,$02,$20
 	DB $4f,$20,$47,$45,$52,$41,$44,$4f
 	DB $52,$20,$44,$45,$20,$45,$53,$43
 	DB $55,$44,$4f,$53,$20,$44,$45,$20
 	DB $41,$54,$4c,$41,$4e,$54,$49,$53
-cv439:
+cv443:
 	; 	IF fase = 5 THEN PRINT AT 516,"A BATALHA FINAL COM GORF"
 	LDA cvb_FASE
 	CMP #5
-	BNE.L cv440
+	BNE.L cv444
 	JSR print_string_cursor_constant
 	DB $04,$02,$18
 	DB $41,$20,$42,$41,$54,$41,$4c,$48
 	DB $41,$20,$46,$49,$4e,$41,$4c,$20
 	DB $43,$4f,$4d,$20,$47,$4f,$52,$46
-cv440:
+cv444:
 	; 	VPOKE $3F01,$0F		' texto invisivel: cores do pal0 em preto
 	LDA #15
 	PHA
@@ -17076,7 +17104,7 @@ cv440:
 	; 	FOR r = 0 TO 6			' fade-in
 	LDA #0
 	STA cvb_R
-cv441:
+cv445:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -17096,54 +17124,54 @@ cv441:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv442:
+cv446:
 	; 			WAIT
 	JSR wait
 	; 			IF CONT1.KEY = 11 THEN GOTO sc_fim
 	LDA key1_data
 	CMP #11
-	BNE.L cv443
+	BNE.L cv447
 	JMP cvb_SC_FIM
-cv443:
+cv447:
 	; 			IF CONT1.BUTTON THEN GOTO sc_fim
 	LDA joy1_data
 	AND #64
-	BEQ.L cv444
+	BEQ.L cv448
 	JMP cvb_SC_FIM
-cv444:
+cv448:
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv442
+	BCC.L cv446
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv441
+	BCC.L cv445
 	; 	FOR q = 0 TO 239		' hold ~4s
 	LDA #0
 	STA cvb_Q
-cv445:
+cv449:
 	; 		WAIT
 	JSR wait
 	; 		IF CONT1.KEY = 11 THEN GOTO sc_fim
 	LDA key1_data
 	CMP #11
-	BNE.L cv446
+	BNE.L cv450
 	JMP cvb_SC_FIM
-cv446:
+cv450:
 	; 		IF CONT1.BUTTON THEN GOTO sc_fim
 	LDA joy1_data
 	AND #64
-	BEQ.L cv447
+	BEQ.L cv451
 	JMP cvb_SC_FIM
-cv447:
+cv451:
 	; 	NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #240
-	BCC.L cv445
+	BCC.L cv449
 	; 	RESTORE fade_tbl_out		' fade-out so quando sai sozinha
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
@@ -17152,7 +17180,7 @@ cv447:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv448:
+cv452:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -17172,19 +17200,19 @@ cv448:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv449:
+cv453:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv449
+	BCC.L cv453
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv448
+	BCC.L cv452
 	; sc_fim:
 cvb_SC_FIM:
 	; 	SCREEN DISABLE
@@ -17207,11 +17235,11 @@ cvb_CLEAR_NTS:
 	; 	FOR w = 0 TO 15
 	LDA #0
 	STA cvb_W
-cv450:
+cv454:
 	; 		FOR i = 0 TO 63
 	LDA #0
 	STA cvb_I
-cv451:
+cv455:
 	; 			VPOKE $2000+w*64+i,0
 	LDA #0
 	PHA
@@ -17254,27 +17282,27 @@ cv451:
 	LDA cvb_I
 	AND #15
 	CMP #15
-	BNE.L cv452
+	BNE.L cv456
 	JSR wait
-cv452:
+cv456:
 	; 		NEXT i
 	INC cvb_I
 	LDA cvb_I
 	CMP #64
-	BCC.L cv451
+	BCC.L cv455
 	; 	NEXT w
 	INC cvb_W
 	LDA cvb_W
 	CMP #16
-	BCC.L cv450
+	BCC.L cv454
 	; 	FOR w = 0 TO 15
 	LDA #0
 	STA cvb_W
-cv453:
+cv457:
 	; 		FOR i = 0 TO 63
 	LDA #0
 	STA cvb_I
-cv454:
+cv458:
 	; 			VPOKE $2800+w*64+i,0
 	LDA #0
 	PHA
@@ -17317,27 +17345,27 @@ cv454:
 	LDA cvb_I
 	AND #15
 	CMP #15
-	BNE.L cv455
+	BNE.L cv459
 	JSR wait
-cv455:
+cv459:
 	; 		NEXT i
 	INC cvb_I
 	LDA cvb_I
 	CMP #64
-	BCC.L cv454
+	BCC.L cv458
 	; 	NEXT w
 	INC cvb_W
 	LDA cvb_W
 	CMP #16
-	BCC.L cv453
+	BCC.L cv457
 	; 	FOR w = 0 TO 15		' $2400 tb: canhoes/streams pisam na 3a pagina
 	LDA #0
 	STA cvb_W
-cv456:
+cv460:
 	; 		FOR i = 0 TO 63
 	LDA #0
 	STA cvb_I
-cv457:
+cv461:
 	; 			VPOKE $2400+w*64+i,0
 	LDA #0
 	PHA
@@ -17380,19 +17408,19 @@ cv457:
 	LDA cvb_I
 	AND #15
 	CMP #15
-	BNE.L cv458
+	BNE.L cv462
 	JSR wait
-cv458:
+cv462:
 	; 		NEXT i
 	INC cvb_I
 	LDA cvb_I
 	CMP #64
-	BCC.L cv457
+	BCC.L cv461
 	; 	NEXT w
 	INC cvb_W
 	LDA cvb_W
 	CMP #16
-	BCC.L cv456
+	BCC.L cv460
 	; END
 	RTS
 	; 
@@ -17629,7 +17657,7 @@ cvb_GO_DRAW:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv459:
+cv463:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -17660,19 +17688,19 @@ cv459:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv460:
+cv464:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv460
+	BCC.L cv464
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv459
+	BCC.L cv463
 	; 	END
 	RTS
 	; 
@@ -17688,21 +17716,21 @@ cvb_FC_RELEASE:
 	; 	IF CONT1.KEY = 11 THEN GOTO fc_release
 	LDA key1_data
 	CMP #11
-	BNE.L cv461
+	BNE.L cv465
 	JMP cvb_FC_RELEASE
-cv461:
+cv465:
 	; 	IF CONT1.BUTTON THEN GOTO fc_release
 	LDA joy1_data
 	AND #64
-	BEQ.L cv462
+	BEQ.L cv466
 	JMP cvb_FC_RELEASE
-cv462:
+cv466:
 	; 	SCREEN DISABLE
 	JSR DISSCR
 	; 	FOR c = 0 TO 63		' tela limpa: esconde sprites (HUD + nave)
 	LDA #0
 	STA cvb_C
-cv463:
+cv467:
 	; 		SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -17718,7 +17746,7 @@ cv463:
 	INC cvb_C
 	LDA cvb_C
 	CMP #64
-	BCC.L cv463
+	BCC.L cv467
 	; 	CLS
 	JSR cls
 	; 	SCROLL 0,0
@@ -17846,7 +17874,7 @@ cv463:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv464:
+cv468:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -17866,54 +17894,54 @@ cv464:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv465:
+cv469:
 	; 			WAIT
 	JSR wait
 	; 			IF CONT1.KEY = 11 THEN GOTO fc_fim
 	LDA key1_data
 	CMP #11
-	BNE.L cv466
+	BNE.L cv470
 	JMP cvb_FC_FIM
-cv466:
+cv470:
 	; 			IF CONT1.BUTTON THEN GOTO fc_fim
 	LDA joy1_data
 	AND #64
-	BEQ.L cv467
+	BEQ.L cv471
 	JMP cvb_FC_FIM
-cv467:
+cv471:
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv465
+	BCC.L cv469
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv464
+	BCC.L cv468
 	; 	FOR q = 0 TO 209
 	LDA #0
 	STA cvb_Q
-cv468:
+cv472:
 	; 		WAIT
 	JSR wait
 	; 		IF CONT1.KEY = 11 THEN GOTO fc_fim
 	LDA key1_data
 	CMP #11
-	BNE.L cv469
+	BNE.L cv473
 	JMP cvb_FC_FIM
-cv469:
+cv473:
 	; 		IF CONT1.BUTTON THEN GOTO fc_fim
 	LDA joy1_data
 	AND #64
-	BEQ.L cv470
+	BEQ.L cv474
 	JMP cvb_FC_FIM
-cv470:
+cv474:
 	; 	NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #210
-	BCC.L cv468
+	BCC.L cv472
 	; 	RESTORE fade_tbl_out
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
@@ -17922,7 +17950,7 @@ cv470:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv471:
+cv475:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -17942,19 +17970,19 @@ cv471:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv472:
+cv476:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv472
+	BCC.L cv476
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv471
+	BCC.L cv475
 	; fc_fim:
 cvb_FC_FIM:
 	; 	SCREEN DISABLE
@@ -17977,21 +18005,21 @@ cvb_EV_RELEASE:
 	; 	IF CONT1.KEY = 11 THEN GOTO ev_release
 	LDA key1_data
 	CMP #11
-	BNE.L cv473
+	BNE.L cv477
 	JMP cvb_EV_RELEASE
-cv473:
+cv477:
 	; 	IF CONT1.BUTTON THEN GOTO ev_release
 	LDA joy1_data
 	AND #64
-	BEQ.L cv474
+	BEQ.L cv478
 	JMP cvb_EV_RELEASE
-cv474:
+cv478:
 	; 	SCREEN DISABLE
 	JSR DISSCR
 	; 	FOR c = 0 TO 63		' tela limpa: esconde sprites (HUD + nave)
 	LDA #0
 	STA cvb_C
-cv475:
+cv479:
 	; 		SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -18007,7 +18035,7 @@ cv475:
 	INC cvb_C
 	LDA cvb_C
 	CMP #64
-	BCC.L cv475
+	BCC.L cv479
 	; 	CLS
 	JSR cls
 	; 	SCROLL 0,0
@@ -18129,7 +18157,7 @@ cv475:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv476:
+cv480:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18147,40 +18175,6 @@ cv476:
 	LDA temp
 	JSR WRTVRM
 	; 		FOR q = 0 TO 3
-	LDA #0
-	STA cvb_Q
-cv477:
-	; 			WAIT
-	JSR wait
-	; 			IF CONT1.KEY = 11 THEN GOTO ev_fim
-	LDA key1_data
-	CMP #11
-	BNE.L cv478
-	JMP cvb_EV_FIM
-cv478:
-	; 			IF CONT1.BUTTON THEN GOTO ev_fim
-	LDA joy1_data
-	AND #64
-	BEQ.L cv479
-	JMP cvb_EV_FIM
-cv479:
-	; 		NEXT q
-	INC cvb_Q
-	LDA cvb_Q
-	CMP #4
-	BCC.L cv477
-	; 	NEXT r
-	INC cvb_R
-	LDA cvb_R
-	CMP #7
-	BCC.L cv476
-	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
-	; 	' 2 x 135 frames = 270 frames (~4.5s), as intended.
-	; 	FOR r = 0 TO 1
-	LDA #0
-	STA cvb_R
-cv480:
-	; 		FOR q = 0 TO 134
 	LDA #0
 	STA cvb_Q
 cv481:
@@ -18201,13 +18195,47 @@ cv483:
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
-	CMP #135
+	CMP #4
 	BCC.L cv481
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
-	CMP #2
+	CMP #7
 	BCC.L cv480
+	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
+	; 	' 2 x 135 frames = 270 frames (~4.5s), as intended.
+	; 	FOR r = 0 TO 1
+	LDA #0
+	STA cvb_R
+cv484:
+	; 		FOR q = 0 TO 134
+	LDA #0
+	STA cvb_Q
+cv485:
+	; 			WAIT
+	JSR wait
+	; 			IF CONT1.KEY = 11 THEN GOTO ev_fim
+	LDA key1_data
+	CMP #11
+	BNE.L cv486
+	JMP cvb_EV_FIM
+cv486:
+	; 			IF CONT1.BUTTON THEN GOTO ev_fim
+	LDA joy1_data
+	AND #64
+	BEQ.L cv487
+	JMP cvb_EV_FIM
+cv487:
+	; 		NEXT q
+	INC cvb_Q
+	LDA cvb_Q
+	CMP #135
+	BCC.L cv485
+	; 	NEXT r
+	INC cvb_R
+	LDA cvb_R
+	CMP #2
+	BCC.L cv484
 	; 	RESTORE fade_tbl_out
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
@@ -18216,7 +18244,7 @@ cv483:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv484:
+cv488:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18236,19 +18264,19 @@ cv484:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv485:
+cv489:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv485
+	BCC.L cv489
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv484
+	BCC.L cv488
 	; ev_fim:
 cvb_EV_FIM:
 	; 	SCREEN DISABLE
@@ -18267,21 +18295,21 @@ cvb_EC_RELEASE:
 	; 	IF CONT1.KEY = 11 THEN GOTO ec_release
 	LDA key1_data
 	CMP #11
-	BNE.L cv486
+	BNE.L cv490
 	JMP cvb_EC_RELEASE
-cv486:
+cv490:
 	; 	IF CONT1.BUTTON THEN GOTO ec_release
 	LDA joy1_data
 	AND #64
-	BEQ.L cv487
+	BEQ.L cv491
 	JMP cvb_EC_RELEASE
-cv487:
+cv491:
 	; 	SCREEN DISABLE
 	JSR DISSCR
 	; 	FOR c = 0 TO 63
 	LDA #0
 	STA cvb_C
-cv488:
+cv492:
 	; 		SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -18297,7 +18325,7 @@ cv488:
 	INC cvb_C
 	LDA cvb_C
 	CMP #64
-	BCC.L cv488
+	BCC.L cv492
 	; 	CLS
 	JSR cls
 	; 	SCROLL 0,0
@@ -18439,7 +18467,7 @@ cv488:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv489:
+cv493:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18457,40 +18485,6 @@ cv489:
 	LDA temp
 	JSR WRTVRM
 	; 		FOR q = 0 TO 3
-	LDA #0
-	STA cvb_Q
-cv490:
-	; 			WAIT
-	JSR wait
-	; 			IF CONT1.KEY = 11 THEN GOTO ec_fim
-	LDA key1_data
-	CMP #11
-	BNE.L cv491
-	JMP cvb_EC_FIM
-cv491:
-	; 			IF CONT1.BUTTON THEN GOTO ec_fim
-	LDA joy1_data
-	AND #64
-	BEQ.L cv492
-	JMP cvb_EC_FIM
-cv492:
-	; 		NEXT q
-	INC cvb_Q
-	LDA cvb_Q
-	CMP #4
-	BCC.L cv490
-	; 	NEXT r
-	INC cvb_R
-	LDA cvb_R
-	CMP #7
-	BCC.L cv489
-	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
-	; 	' 2 x 225 frames = 450 frames (~7.5s), as intended.
-	; 	FOR r = 0 TO 1
-	LDA #0
-	STA cvb_R
-cv493:
-	; 		FOR q = 0 TO 224
 	LDA #0
 	STA cvb_Q
 cv494:
@@ -18511,13 +18505,47 @@ cv496:
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
-	CMP #225
+	CMP #4
 	BCC.L cv494
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
-	CMP #2
+	CMP #7
 	BCC.L cv493
+	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
+	; 	' 2 x 225 frames = 450 frames (~7.5s), as intended.
+	; 	FOR r = 0 TO 1
+	LDA #0
+	STA cvb_R
+cv497:
+	; 		FOR q = 0 TO 224
+	LDA #0
+	STA cvb_Q
+cv498:
+	; 			WAIT
+	JSR wait
+	; 			IF CONT1.KEY = 11 THEN GOTO ec_fim
+	LDA key1_data
+	CMP #11
+	BNE.L cv499
+	JMP cvb_EC_FIM
+cv499:
+	; 			IF CONT1.BUTTON THEN GOTO ec_fim
+	LDA joy1_data
+	AND #64
+	BEQ.L cv500
+	JMP cvb_EC_FIM
+cv500:
+	; 		NEXT q
+	INC cvb_Q
+	LDA cvb_Q
+	CMP #225
+	BCC.L cv498
+	; 	NEXT r
+	INC cvb_R
+	LDA cvb_R
+	CMP #2
+	BCC.L cv497
 	; 	RESTORE fade_tbl_out
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
@@ -18526,7 +18554,7 @@ cv496:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv497:
+cv501:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18546,19 +18574,19 @@ cv497:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv498:
+cv502:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv498
+	BCC.L cv502
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv497
+	BCC.L cv501
 	; ec_fim:
 cvb_EC_FIM:
 	; 	SCREEN DISABLE
@@ -18577,21 +18605,21 @@ cvb_TE_RELEASE:
 	; 	IF CONT1.KEY = 11 THEN GOTO te_release
 	LDA key1_data
 	CMP #11
-	BNE.L cv499
+	BNE.L cv503
 	JMP cvb_TE_RELEASE
-cv499:
+cv503:
 	; 	IF CONT1.BUTTON THEN GOTO te_release
 	LDA joy1_data
 	AND #64
-	BEQ.L cv500
+	BEQ.L cv504
 	JMP cvb_TE_RELEASE
-cv500:
+cv504:
 	; 	SCREEN DISABLE
 	JSR DISSCR
 	; 	FOR c = 0 TO 63
 	LDA #0
 	STA cvb_C
-cv501:
+cv505:
 	; 		SPRITE c,$f0,0,0,0
 	LDA cvb_C
 	PHA
@@ -18607,7 +18635,7 @@ cv501:
 	INC cvb_C
 	LDA cvb_C
 	CMP #64
-	BCC.L cv501
+	BCC.L cv505
 	; 	CLS
 	JSR cls
 	; 	SCROLL 0,0
@@ -18666,7 +18694,7 @@ cv501:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv502:
+cv506:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18684,40 +18712,6 @@ cv502:
 	LDA temp
 	JSR WRTVRM
 	; 		FOR q = 0 TO 3
-	LDA #0
-	STA cvb_Q
-cv503:
-	; 			WAIT
-	JSR wait
-	; 			IF CONT1.KEY = 11 THEN GOTO te_fim
-	LDA key1_data
-	CMP #11
-	BNE.L cv504
-	JMP cvb_TE_FIM
-cv504:
-	; 			IF CONT1.BUTTON THEN GOTO te_fim
-	LDA joy1_data
-	AND #64
-	BEQ.L cv505
-	JMP cvb_TE_FIM
-cv505:
-	; 		NEXT q
-	INC cvb_Q
-	LDA cvb_Q
-	CMP #4
-	BCC.L cv503
-	; 	NEXT r
-	INC cvb_R
-	LDA cvb_R
-	CMP #7
-	BCC.L cv502
-	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
-	; 	' 2 x 135 frames = 270 frames (~4.5s), as intended.
-	; 	FOR r = 0 TO 1
-	LDA #0
-	STA cvb_R
-cv506:
-	; 		FOR q = 0 TO 134
 	LDA #0
 	STA cvb_Q
 cv507:
@@ -18738,13 +18732,47 @@ cv509:
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
-	CMP #135
+	CMP #4
 	BCC.L cv507
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
-	CMP #2
+	CMP #7
 	BCC.L cv506
+	; 	' CVBasic counters are 8-bit: never use a FOR limit above 254.
+	; 	' 2 x 135 frames = 270 frames (~4.5s), as intended.
+	; 	FOR r = 0 TO 1
+	LDA #0
+	STA cvb_R
+cv510:
+	; 		FOR q = 0 TO 134
+	LDA #0
+	STA cvb_Q
+cv511:
+	; 			WAIT
+	JSR wait
+	; 			IF CONT1.KEY = 11 THEN GOTO te_fim
+	LDA key1_data
+	CMP #11
+	BNE.L cv512
+	JMP cvb_TE_FIM
+cv512:
+	; 			IF CONT1.BUTTON THEN GOTO te_fim
+	LDA joy1_data
+	AND #64
+	BEQ.L cv513
+	JMP cvb_TE_FIM
+cv513:
+	; 		NEXT q
+	INC cvb_Q
+	LDA cvb_Q
+	CMP #135
+	BCC.L cv511
+	; 	NEXT r
+	INC cvb_R
+	LDA cvb_R
+	CMP #2
+	BCC.L cv510
 	; 	RESTORE fade_tbl_out
 	LDA #cvb_FADE_TBL_OUT
 	LDY #cvb_FADE_TBL_OUT>>8
@@ -18753,7 +18781,7 @@ cv509:
 	; 	FOR r = 0 TO 6
 	LDA #0
 	STA cvb_R
-cv510:
+cv514:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -18773,19 +18801,19 @@ cv510:
 	; 		FOR q = 0 TO 3
 	LDA #0
 	STA cvb_Q
-cv511:
+cv515:
 	; 			WAIT
 	JSR wait
 	; 		NEXT q
 	INC cvb_Q
 	LDA cvb_Q
 	CMP #4
-	BCC.L cv511
+	BCC.L cv515
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #7
-	BCC.L cv510
+	BCC.L cv514
 	; te_fim:
 cvb_TE_FIM:
 	; 	SCREEN DISABLE
@@ -19980,10 +20008,10 @@ cvb_TE_FIM:
 cvb_ANIM_IDLE:
 	; 	IF ret = 0 THEN
 	LDA cvb_RET
-	BNE.L cv512
+	BNE.L cv516
 	; 		IF dir <> 0 THEN
 	LDA cvb_DIR
-	BEQ.L cv513
+	BEQ.L cv517
 	; 			ret = 1
 	LDA #1
 	STA cvb_RET
@@ -19991,18 +20019,18 @@ cvb_ANIM_IDLE:
 	LDA #0
 	STA cvb_AN
 	; 		END IF
-cv513:
+cv517:
 	; 	END IF
-cv512:
+cv516:
 	; 	IF ret <> 0 THEN
 	LDA cvb_RET
-	BEQ.L cv514
+	BEQ.L cv518
 	; 		an = an + 1
 	INC cvb_AN
 	; 		IF an >= 12 THEN
 	LDA cvb_AN
 	CMP #12
-	BCC.L cv515
+	BCC.L cv519
 	; 			ret = 0
 	LDA #0
 	STA cvb_RET
@@ -20011,8 +20039,8 @@ cv512:
 	; 			an = 0
 	STA cvb_AN
 	; 		ELSE
-	JMP cv516
-cv515:
+	JMP cv520
+cv519:
 	; 			slot = 6 - an / 4
 	LDA #6
 	LDY #0
@@ -20040,19 +20068,19 @@ cv515:
 	TXA
 	STA cvb_SLOT
 	; 		END IF
-cv516:
+cv520:
 	; 	ELSE
-	JMP cv517
-cv514:
+	JMP cv521
+cv518:
 	; 		an = an + 1
 	INC cvb_AN
 	; 		IF an > 19 THEN an = 0
 	LDA cvb_AN
 	CMP #20
-	BCC.L cv518
+	BCC.L cv522
 	LDA #0
 	STA cvb_AN
-cv518:
+cv522:
 	; 		slot = (an / 5) % 4
 	LDA cvb_AN
 	LDY #0
@@ -20064,7 +20092,7 @@ cv518:
 	AND #3
 	STA cvb_SLOT
 	; 	END IF
-cv517:
+cv521:
 	; 	END
 	RTS
 	; 
@@ -23973,11 +24001,11 @@ cvb_LAVA_WR:
 	; 	FOR r = 0 TO 29
 	LDA #0
 	STA cvb_R
-cv519:
+cv523:
 	; 		FOR i = 0 TO 31
 	LDA #0
 	STA cvb_I
-cv520:
+cv524:
 	; 			READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -23993,19 +24021,19 @@ cv520:
 	JSR WRTVRM
 	; 			#bk = #bk + 1
 	INC cvb_#BK
-	BNE cv521
+	BNE cv525
 	INC cvb_#BK+1
-cv521:
+cv525:
 	; 		NEXT i
 	INC cvb_I
 	LDA cvb_I
 	CMP #32
-	BCC.L cv520
+	BCC.L cv524
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #30
-	BCC.L cv519
+	BCC.L cv523
 	; 	END
 	RTS
 	; 
@@ -24072,11 +24100,11 @@ cvb_LAVA_SEA_FILL:
 	; 	FOR r = 0 TO 29
 	LDA #0
 	STA cvb_R
-cv522:
+cv526:
 	; 		FOR c = 0 TO 31
 	LDA #0
 	STA cvb_C
-cv523:
+cv527:
 	; 			VPOKE #tw, 96 + (c AND 1) + 2 * (r AND 1)
 	LDA cvb_C
 	AND #1
@@ -24120,21 +24148,21 @@ cv523:
 	JSR WRTVRM
 	; 			#tw = #tw + 1
 	INC cvb_#TW
-	BNE cv524
+	BNE cv528
 	INC cvb_#TW+1
-cv524:
+cv528:
 	; 		NEXT c
 	INC cvb_C
 	LDA cvb_C
 	CMP #32
-	BCC.L cv523
+	BCC.L cv527
 	; 		WAIT			' 32 writes/frame: folga no buffer do NMI
 	JSR wait
 	; 	NEXT r
 	INC cvb_R
 	LDA cvb_R
 	CMP #30
-	BCC.L cv522
+	BCC.L cv526
 	; 	' v0.27: 5 ilhas PEQUENAS (2x2 = 4 tiles de 8x8) em linhas/cols
 	; 	' pares, iguais nas 3 paginas -> conteudo estatico, scroll perfeito.
 	; 	#tw = #bk + 134		' ilha A: linha 4, col 6
@@ -24434,25 +24462,25 @@ cvb_LAVA_TICK:
 	LDA cvb_SCROLL_Y
 	AND #7
 	CMP #7
-	BNE.L cv525
+	BNE.L cv529
 	; 		GOSUB lava_in
 	JSR cvb_LAVA_IN
 	; 	ELSEIF (scroll_y AND 7) = 6 THEN
-	JMP cv526
-cv525:
+	JMP cv530
+cv529:
 	LDA cvb_SCROLL_Y
 	AND #7
 	CMP #6
-	BNE.L cv527
+	BNE.L cv531
 	; 		IF wrf = 1 THEN GOSUB lava_strip
 	LDA cvb_WRF
 	CMP #1
-	BNE.L cv528
+	BNE.L cv532
 	JSR cvb_LAVA_STRIP
-cv528:
+cv532:
 	; 	END IF
-cv526:
-cv527:
+cv530:
+cv531:
 	; 	END
 	RTS
 	; 
@@ -24460,7 +24488,7 @@ cv527:
 cvb_LAVA_IN:
 	; 	IF wrf = 0 THEN		' 1a costura: trava a fase do anel com o scroll
 	LDA cvb_WRF
-	BNE.L cv529
+	BNE.L cv533
 	; 		wr = scroll_y / 8		' slot do topo agora (0-29)
 	LDA cvb_SCROLL_Y
 	LSR A
@@ -24471,25 +24499,25 @@ cvb_LAVA_IN:
 	LDA #1
 	STA cvb_WRF
 	; 	ELSE
-	JMP cv530
-cv529:
+	JMP cv534
+cv533:
 	; 		wr = wr - 1		' linha-mundo seguinte (anel 60: wrap 0->59)
 	DEC cvb_WR
 	; 		IF wr = $ff THEN wr = 59
 	LDA cvb_WR
 	CMP #255
-	BNE.L cv531
+	BNE.L cv535
 	LDA #59
 	STA cvb_WR
-cv531:
+cv535:
 	; 	END IF
-cv530:
+cv534:
 	; 	w = wr			' w = linha dentro do mapa (0-29), RESTORE na metade
 	LDA cvb_WR
 	STA cvb_W
 	; 	IF w >= 30 THEN
 	CMP #30
-	BCC.L cv532
+	BCC.L cv536
 	; 		w = w - 30
 	SEC
 	SBC #30
@@ -24500,15 +24528,15 @@ cv530:
 	STA read_pointer
 	STY read_pointer+1
 	; 	ELSE
-	JMP cv533
-cv532:
+	JMP cv537
+cv536:
 	; 		RESTORE lava_map_a
 	LDA #cvb_LAVA_MAP_A
 	LDY #cvb_LAVA_MAP_A>>8
 	STA read_pointer
 	STY read_pointer+1
 	; 	END IF
-cv533:
+cv537:
 	; 	' #ld = $2000 + w*32; read_pointer += w*32 (low=w<<5, high=w>>3;
 	; 	' 16 bits de verdade = adeus bug do ASL sem carry da v0.19)
 	; 	ASM LDA cvb_W
@@ -24560,7 +24588,7 @@ cv533:
 	; 	FOR c = 0 TO 31		' 32 writes na mesma moldura (< PPUSIZE 48)
 	LDA #0
 	STA cvb_C
-cv534:
+cv538:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -24585,7 +24613,7 @@ cv534:
 	INC cvb_C
 	LDA cvb_C
 	CMP #32
-	BCC.L cv534
+	BCC.L cv538
 	; 	END
 	RTS
 	; 
@@ -24598,17 +24626,17 @@ cvb_LAVA_STRIP:
 	STA cvb_W
 	; 	IF w >= 60 THEN w = w - 60
 	CMP #60
-	BCC.L cv535
+	BCC.L cv539
 	SEC
 	SBC #60
 	STA cvb_W
-cv535:
+cv539:
 	; lava_strip_w:		' entrada com w ja' calculado (lava_setup reusa)
 cvb_LAVA_STRIP_W:
 	; 	IF w >= 30 THEN
 	LDA cvb_W
 	CMP #30
-	BCC.L cv536
+	BCC.L cv540
 	; 		w = w - 30
 	SEC
 	SBC #30
@@ -24619,15 +24647,15 @@ cvb_LAVA_STRIP_W:
 	STA read_pointer
 	STY read_pointer+1
 	; 	ELSE
-	JMP cv537
-cv536:
+	JMP cv541
+cv540:
 	; 		RESTORE lava_map_a
 	LDA #cvb_LAVA_MAP_A
 	LDY #cvb_LAVA_MAP_A>>8
 	STA read_pointer
 	STY read_pointer+1
 	; 	END IF
-cv537:
+cv541:
 	; 	ASM LDA cvb_W
  LDA cvb_W
 	; 	ASM ASL A
@@ -24669,7 +24697,7 @@ cv537:
 	; 	FOR c = 0 TO 31
 	LDA #0
 	STA cvb_C
-cv538:
+cv542:
 	; 		READ BYTE e
 	JSR _read8
 	STA cvb_E
@@ -24693,7 +24721,7 @@ cv538:
 	INC cvb_C
 	LDA cvb_C
 	CMP #32
-	BCC.L cv538
+	BCC.L cv542
 	; 	END
 	RTS
 	; 

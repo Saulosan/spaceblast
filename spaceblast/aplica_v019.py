@@ -19,8 +19,11 @@ aplica_v019.py — v0.19 "Planeta de Lava": cirurgia no space-blast.bas.
     lava_cannons (mira+atira), lava_wr; dados lava_layout.bas.inc MERGED.
 11. CHRROM 2 (lava_chr2.bas.inc) anexado no fim do .bas.
 """
-BAS = '/home/user/spaceblast/space-blast.bas'
-src = open(BAS, encoding='utf-8').read()
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BAS = HERE / 'space-blast.bas'
+src = BAS.read_text(encoding='utf-8')
 
 def rep(old, new, cnt=1):
     global src
@@ -179,7 +182,7 @@ f2_fim:
 src = src.replace(anchor, procs_b1, 1)
 
 # ---------- 10. BANK 3 ----------
-layout = open('/home/user/spaceblast/lava_layout.bas.inc', encoding='utf-8').read()
+layout = (HERE / 'lava_layout.bas.inc').read_text(encoding='utf-8')
 bank2_anchor = "BANK 2\t' v0.15: trilhas (~2.9KB): player do NMI rele music_bank a cada nota"
 assert src.count(bank2_anchor) == 1
 bank3 = """BANK 3\t' v0.19: FASE 2 - PLANETA DE LAVA (setup, terreno, canhoes)
@@ -283,7 +286,7 @@ lava_cannons: PROCEDURE\t' canhoes BG: miram e atiram no jogador
 src = src.replace(bank2_anchor, bank3, 1)
 
 # ---------- 11. CHRROM 2 no fim ----------
-chrr = open('/home/user/spaceblast/lava_chr2.bas.inc', encoding='utf-8').read()
+chrr = (HERE / 'lava_chr2.bas.inc').read_text(encoding='utf-8')
 src = src.rstrip('\n') + '\n\n' + chrr + '\n'
 
 open(BAS, 'w', encoding='utf-8').write(src)

@@ -3,13 +3,17 @@
 # (128x48: SPACE branco/cinza + cometa teal + BLAST vermelho + estrelas),
 # sem barra de katakana. Tambem: corrige "APERTE START" todo branco e
 # substitui as estrelas do fundo (patterns 1-29) pelas da nova folha.
+import os
 import re
+from pathlib import Path
 import numpy as np
 from PIL import Image
 
-BAS = '/home/user/spaceblast/space-blast.bas'
-PNG = '/home/user/uploads/title-space.png'
-PREV = '/home/user/spaceblast/docs/title_nova_preview.png'
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+BAS = HERE / 'space-blast.bas'
+PNG = UPLOADS / 'title-space.png'
+PREV = HERE / 'docs' / 'title_nova_preview.png'
 
 im = np.array(Image.open(PNG).convert('RGB'))
 CORES = {'W':(255,255,255), 'G':(160,160,160), 'T':(10,124,138), 'D':(152,3,3), 'R':(222,0,0)}

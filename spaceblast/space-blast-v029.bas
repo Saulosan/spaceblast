@@ -1,4 +1,6 @@
 BANK ROM 512	' v0.15: UNROM 512 (mapper 30) nativo do CVBasic!	' jogo
+	' v0.29 candidate: limita lotes de VPOKE durante flashes/cenas de morte
+	' para caber no VBlank; nenhuma mecanica ou arte foi alterada.
 							' segue TODO no banco 0 (32K) como na v0.14; bancos
 							' 1-28 livres p/ fases 2-5 + CHRROM 0-3 p/ tiles
 
@@ -1363,8 +1365,10 @@ death_loop:
 	CLS
 	SCROLL 0,0
 	PALETTE LOAD game_palette_title
+	WAIT			' separa a carga da paleta dos attrs (limite do NMI)
 	FOR i = 0 TO 39		' zera attrs das linhas 0-4 (se morreu no boss)
 		VPOKE $23C0 + i,0
+		IF i = 31 THEN WAIT	' no maximo 32 escritas por VBlank
 	NEXT i
 	WAIT
 	VPOKE $23D2,$40		' "GAME OVER"  -> pal1 (branco)
@@ -1443,14 +1447,17 @@ stars_fill:	PROCEDURE	' desenha o layout do boot nas TRES nametables
 	' pendentes por NMI; escrever demais de uma vez PERDE escritas.
 	FOR sk = 0 TO 47
 		VPOKE $2000 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 	FOR sk = 0 TO 47
 		VPOKE $2400 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 	FOR sk = 0 TO 47
 		VPOKE $2800 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 END

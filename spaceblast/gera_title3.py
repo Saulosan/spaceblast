@@ -9,12 +9,16 @@ Mapa de paletas por quad 16x16 (logo-local, 8x3 quads):
   linha 2:  3 2 2 2 2 2 2 3
 Bits extra: corrige $23ED (RT cinza) e mantem bullet 212 / boss 213-251 intactos.
 """
-import re, sys
+import os
+import re
+from pathlib import Path
 from PIL import Image, ImageDraw
 
-BAS = "/home/user/spaceblast/space-blast.bas"
-PNG = "/home/user/uploads/title-space.png"
-PREV = "/home/user/spaceblast/docs/title_v16b_preview.png"
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+BAS = HERE / 'space-blast.bas'
+PNG = UPLOADS / 'title-space.png'
+PREV = HERE / 'docs' / 'title_v16b_preview.png'
 
 # ---------- 1) classificacao de pixels (6 cores exatas) ----------
 def cls(px):

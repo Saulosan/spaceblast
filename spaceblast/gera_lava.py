@@ -25,11 +25,16 @@ Tileset: uploads/Lava Stage BG.png (96x48, 18 metatiles 16x16, cores que
 batemm 1:1 com a paleta NES: $07/$16/$17/$0C/$1C — remapeamos $17->$16,
 7 px do D3). Todos os metatiles usam pal0 -> attr todo zero.
 """
+import os
 import random
+from pathlib import Path
 from PIL import Image
 
-ROM  = '/home/user/spaceblast/space-blast.nes'
-PNG  = '/home/user/uploads/Lava Stage BG.png'
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+ROM  = HERE / 'space-blast.nes'
+PNG  = UPLOADS / 'Lava Stage BG.png'
+
 H_OFF = 16 + 29 * 16384          # inicio da CHRROM 0 no .nes
 
 COLMAP = {(136,20,0):0, (248,56,0):1, (228,92,16):1, (0,136,136):2, (0,64,88):3}
@@ -86,7 +91,7 @@ def emit(fd, pattern, tiles, comentario=None):
             fd.write('\tBITMAP "%s"\n' % ln)
         fd.write('\n')
 
-with open('/home/user/spaceblast/lava_chr2.bas.inc', 'w') as fd:
+with (HERE / 'lava_chr2.bas.inc').open('w', encoding='utf-8') as fd:
     fd.write("\t' ==== gerado por gera_lava.py (v0.19): CHRROM 2 = fase 2 (lava) ====\n")
     fd.write('\tCHRROM 2\n')
     emit(fd, 32, [rom_tile(0, n) for n in range(32, 96)],
@@ -147,7 +152,7 @@ lay_a, can_a = gen_half(2, 2, None)
 lay_b, can_b = gen_half(2, 3, None)
 # canhoes: guardar (col, meta-linha global 0..29)
 cannons = [(c, r) for c, r in can_a] + [(c, r + 15) for c, r in can_b]
-with open('/home/user/spaceblast/lava_layout.bas.inc', 'w') as fd:
+with (HERE / 'lava_layout.bas.inc').open('w', encoding='utf-8') as fd:
     fd.write("\t' ==== gerado por gera_lava.py (v0.19): layout da fase 2 ====\n")
     fd.write("\t' mapas EXPANDIDOS: 30 tile-rows x 32 tiles por metade\n")
     fd.write("\t' (metatile mx*2,my*2 -> tiles 2x2 via tabela de ids dedup)\n")

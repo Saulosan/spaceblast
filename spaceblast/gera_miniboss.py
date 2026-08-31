@@ -6,9 +6,15 @@
 # (VPOKE $3F19-1B no inicio da onda do miniboss, restaurada ao morrer).
 # Cada frame = 8 sprites 8x16: fileira de cima PATTERN 396..402(+2),
 # fileira de baixo 404..410(+2); frame B = 412..426. Byte OAM = 141+.
+from pathlib import Path
+import os
 from PIL import Image
 
-SRC = '/home/user/uploads/miniboss-1.png'
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+OUTDIR = Path(os.environ.get('SPACEBLAST_GENERATED', '/tmp'))
+OUTDIR.mkdir(parents=True, exist_ok=True)
+SRC = UPLOADS / 'miniboss-1.png'
 
 def classifica(r, g, b, a):
     if r < 40 and g < 40 and b < 40:
@@ -34,7 +40,7 @@ for f in range(2):
     for y in range(32):
         for x in range(32):
             prev.putpixel((f * 32 + x, y), CH[frames[f][y][x]])
-prev.resize((320, 160), Image.NEAREST).save('/tmp/miniboss_nes.png')
+prev.resize((320, 160), Image.NEAREST).save(OUTDIR / 'miniboss_nes.png')
 
 # gera bloco CVBasic
 PL = {0: '.', 1: '1', 2: '2', 3: '3'}
@@ -55,5 +61,5 @@ for f in range(2):
                 row = frames[f][fil * 16 + y]
                 out.append('\tBITMAP "' + ''.join(PL[row[col * 8 + x]]
                            for x in range(8)) + '"\n')
-open('/tmp/miniboss_tiles.bas', 'w').writelines(out)
+(OUTDIR / 'miniboss_tiles.bas').write_text(''.join(out))
 print('tiles gerados: %d linhas' % len(out))

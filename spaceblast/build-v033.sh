@@ -1,4 +1,6 @@
 #!/bin/sh
+# build-v033.sh — compila a ROM final da apresentacao/textos v0.33.
+# Mantem os patches de build reproduzivel de build.sh.
 set -eu
 
 # Resolve paths from this script, not from the caller's current directory.
@@ -61,21 +63,21 @@ fi
 
 # Use stable command names in generated assembly; the actual binaries can be
 # supplied from any supported path above.
-PATH="$BUILD_TMP:$PATH" cvbasic --nes space-blast.bas space-blast.asm
+PATH="$BUILD_TMP:$PATH" cvbasic --nes space-blast-v033.bas space-blast-v033.asm
 # CVBasic leaves one space at the end of its command comment; normalize it
 # so generated assembly passes whitespace checks and diffs stay reviewable.
-sed -i 's/space-blast\.asm $/space-blast.asm/' space-blast.asm
-sed -i 's/^\t; Created: .*/\t; Created: reproducible build/' space-blast.asm
+sed -i 's/space-blast-v033\.asm $/space-blast-v033.asm/' space-blast-v033.asm
+sed -i 's/^\t; Created: .*/\t; Created: reproducible build/' space-blast-v033.asm
 # v0.16: prologue ligava o video ($2001=$1E) ANTES do main = flash cinza de
 # ~17 frames no boot (medido no fceumm; existia desde a v0.14). Com a splash
 # FALCON SOFT de fade preto isso ficava feio. Patch: mantem o video DESLIGADO
 # no fim do prologue ($00); o primeiro SCREEN ENABLE do main liga de vez.
-sed -i 's/LDA #\$1e\t; Color normal, Sprites visible, Background visible, No clipping, Color./LDA #$00\t; v0.16: boot sem flash cinza (video so liga no SCREEN ENABLE)/' space-blast.asm
+sed -i 's/LDA #\$1e\t; Color normal, Sprites visible, Background visible, No clipping, Color./LDA #$00\t; v0.16: boot sem flash cinza (video so liga no SCREEN ENABLE)/' space-blast-v033.asm
 # v0.16 (complemento): a RAM de paleta do PPU acorda com lixo e o backdrop
 # aparece ~15f durante a copia do CHR. $3F00=$0F ANTES da copia = boot preto.
-sed -i '0,/\tJSR copy_chrram/s//\tLDA #$3F\n\tSTA PPUADDR\n\tLDA #$00\n\tSTA PPUADDR\n\tLDA #$0F\n\tSTA PPUDATA\n\tJSR copy_chrram/' space-blast.asm
+sed -i '0,/\tJSR copy_chrram/s//\tLDA #$3F\n\tSTA PPUADDR\n\tLDA #$00\n\tSTA PPUADDR\n\tLDA #$0F\n\tSTA PPUDATA\n\tJSR copy_chrram/' space-blast-v033.asm
 # v0.20: PPUBUF de 64B (21 writes/frame) estourava no burst do stream do
 # lava e o WRTVRM dava JMP wait = frame de jogo perdido (fase 2 a 70-87%
 # da velocidade real!). 144B = 48 writes/frame: cabe qualquer burst.
-sed -i 's/^PPUSIZE:\tEQU \$40$/PPUSIZE:\tEQU $90\t; v0.20 burst stream/' space-blast.asm
-PATH="$BUILD_TMP:$PATH" gasm80 space-blast.asm -o space-blast.nes
+sed -i 's/^PPUSIZE:\tEQU \$40$/PPUSIZE:\tEQU $90\t; v0.20 burst stream/' space-blast-v033.asm
+PATH="$BUILD_TMP:$PATH" gasm80 space-blast-v033.asm -o space-blast-v033.nes

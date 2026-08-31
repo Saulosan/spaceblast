@@ -1,4 +1,6 @@
-BANK ROM 512	' v0.15: UNROM 512 (mapper 30) nativo do CVBasic!	' jogo
+BANK ROM 512	' v0.30: apresentacao, historia e creditos em scroll; gameplay da v0.29 intacto
+	' v0.29 candidate: limita lotes de VPOKE durante flashes/cenas de morte
+	' para caber no VBlank; nenhuma mecanica ou arte foi alterada.
 							' segue TODO no banco 0 (32K) como na v0.14; bancos
 							' 1-28 livres p/ fases 2-5 + CHRROM 0-3 p/ tiles
 
@@ -376,16 +378,15 @@ title_screen:
 	PRINT AT 714,"APERTE START"
 	PRINT AT 871,"2026   FALCON SOFT"
 	VPOKE $236C,188		' "•" central do rodape (NT1: AT 871+5 = 876)
+
 title_wait:
-	WAIT
-	IF (FRAME AND 16) = 0 THEN
-		PRINT AT 714,"APERTE START"
-	ELSE
-		PRINT AT 714,"            "
-	END IF
-	IF CONT1.KEY = 11 THEN GOTO begin_game
-	IF CONT1.BUTTON THEN GOTO begin_game
-	GOTO title_wait
+	' v0.30: o loop de espera e a historia ficam no banco 1; o banco 0
+	' conserva somente a troca de banco; a historia termina em reset completo.
+	BANK SELECT 1
+	GOSUB title_idle_wait
+	BANK SELECT 0
+	IF sk = 0 THEN GOTO begin_game
+	GOTO go_reset
 
 	'
 	' INICIO DO JOGO
@@ -1293,7 +1294,7 @@ fase1_clear:
 		GOSUB end_creditos
 		GOSUB end_theend
 		BANK SELECT 0
-		GOTO begin_game		' volta p/ a fase 01 (partida nova)
+		GOTO go_reset		' depois do THE END? volta ao splash com reset completo
 	END IF
 	fase = fase + 1
 	GOSUB stage_card	' v0.28: cartao generico (usa a var fase)
@@ -1363,8 +1364,10 @@ death_loop:
 	CLS
 	SCROLL 0,0
 	PALETTE LOAD game_palette_title
+	WAIT			' separa a carga da paleta dos attrs (limite do NMI)
 	FOR i = 0 TO 39		' zera attrs das linhas 0-4 (se morreu no boss)
 		VPOKE $23C0 + i,0
+		IF i = 31 THEN WAIT	' no maximo 32 escritas por VBlank
 	NEXT i
 	WAIT
 	VPOKE $23D2,$40		' "GAME OVER"  -> pal1 (branco)
@@ -1443,14 +1446,17 @@ stars_fill:	PROCEDURE	' desenha o layout do boot nas TRES nametables
 	' pendentes por NMI; escrever demais de uma vez PERDE escritas.
 	FOR sk = 0 TO 47
 		VPOKE $2000 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 	FOR sk = 0 TO 47
 		VPOKE $2400 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 	FOR sk = 0 TO 47
 		VPOKE $2800 + #stw(sk), stt(sk)
+		IF sk = 31 THEN WAIT
 	NEXT sk
 	WAIT
 END
@@ -2412,6 +2418,26 @@ fs_fim:
 	' (palette cycling, mesma rampa da Falcon), sai com START ou sozinha
 	' (~4s). Texto usa pal0/cor3: attrs zerados pelo CLS, nada mais p/ setar.
 	'
+title_idle_wait: PROCEDURE
+	#bo = 0
+	sk = 0
+title_idle_loop:
+	WAIT
+	IF (FRAME AND 16) = 0 THEN
+		PRINT AT 714,"APERTE START"
+	ELSE
+		PRINT AT 714,"            "
+	END IF
+	IF CONT1.KEY = 11 THEN GOTO title_idle_done
+	IF CONT1.BUTTON THEN GOTO title_idle_done
+	#bo = #bo + 1
+	IF #bo < 300 THEN GOTO title_idle_loop
+	' Cinco segundos sem START: historia; ao voltar, o banco 0 faz reset completo.
+	GOSUB history_screen
+	sk = 1
+title_idle_done:
+	END
+
 stage_card: PROCEDURE
 sc_release:				' espera soltar o START do game over/titulo
 	WAIT
@@ -2425,10 +2451,13 @@ sc_release:				' espera soltar o START do game over/titulo
 	IF fase = 2 THEN PRINT AT 519,"O PLANETA DE FOGO"
 	IF fase = 3 THEN
 		PRINT AT 516,"O CINTURAO DE ASTEROIDES"
-		VPOKE $2000 + 493,26	' til na linha acima do O de CINTURAO
-		VPOKE $2000 + 503,27	' agudo na linha acima do O de ASTEROIDES
+		VPOKE $2000 + 492,26	' til sobre o A de CINTURAO
+		VPOKE $2000 + 503,27	' agudo sobre o O de ASTEROIDES
 	END IF
-	IF fase = 4 THEN PRINT AT 512,"O GERADOR DE ESCUDOS DE ATLANTIS"
+	IF fase = 4 THEN
+		PRINT AT 518,"O GERADOR DE ESCUDOS"
+		PRINT AT 582,"DO PLANETA ATLANTIS"
+	END IF
 	IF fase = 5 THEN PRINT AT 516,"A BATALHA FINAL COM GORF"
 	VPOKE $3F01,$0F		' texto invisivel: cores do pal0 em preto
 	VPOKE $3F02,$0F
@@ -2650,24 +2679,18 @@ ec_release:
 	FOR c = 0 TO 63
 		SPRITE c,$f0,0,0,0
 	NEXT c
-	CLS
-	SCROLL 0,0
-	PRINT AT 130,"PROGRAMACAO: SAULO SANTIAGO"
-	PRINT AT 196,"GRAFICOS: SAULO SANTIAGO"
-	PRINT AT 262,"PRODUCAO: LMS RETRO"
-	PRINT AT 324,"PUBLICACAO: FALCON SOFT"
-	PRINT AT 389,"TESTES: MARCOS FELIPE,"
-	PRINT AT 451,"LUCA VOLOTAO, LUCAS MUNHOZ"
-	PRINT AT 548,"AGRADECIMENTOS ESPECIAIS:"
-	PRINT AT 614,"WARPZONE, SHMUPSBR,"
-	PRINT AT 674,"YURI DAVILA, THIAGO MINEIRO,"
-	PRINT AT 737,"LUCAS MUNHOZ E TODOS OS AMIGOS"
-	PRINT AT 805,"QUE SEMPRE ACREDITARAM"
-	PRINT AT 872,"NA FALCON SOFT."
-	VPOKE $2000 + 428,26	' til na linha acima do A de VOLOTAO
+	POKE $1C,$00		' fonte Saulo; os acentos sao tiles na linha vazia acima
+	PALETTE LOAD game_palette_title
+	CLS			' primeira nametable
+	GOSUB scroll_clear_nt2	' segunda nametable ($2800), necessaria ao scroll
+	GOSUB scroll_draw_credits
+	GOSUB scroll_set_tail_attrs
+	#bk = 0
+	SCROLL 0,#bk
 	VPOKE $3F01,$0F
 	VPOKE $3F02,$0F
 	VPOKE $3F03,$0F
+	VPOKE $3F07,$0F
 	WAIT
 	SCREEN ENABLE
 	RESTORE fade_tbl
@@ -2678,18 +2701,31 @@ ec_release:
 		FOR q = 0 TO 3
 			WAIT
 			IF CONT1.KEY = 11 THEN GOTO ec_fim
-			IF CONT1.BUTTON THEN GOTO ec_fim
 		NEXT q
 	NEXT r
-	' CVBasic counters are 8-bit: never use a FOR limit above 254.
-	' 2 x 225 frames = 450 frames (~7.5s), as intended.
+	' Primeiro trecho: 256 pixels ate $2800 ocupar a tela inteira.
 	FOR r = 0 TO 1
-		FOR q = 0 TO 224
+		FOR q = 0 TO 127
 			WAIT
 			IF CONT1.KEY = 11 THEN GOTO ec_fim
-			IF CONT1.BUTTON THEN GOTO ec_fim
+			#bk = #bk + 1
+			SCROLL 0,#bk
+			WAIT
+			IF CONT1.KEY = 11 THEN GOTO ec_fim
 		NEXT q
 	NEXT r
+	' $2000 ja esta fora da tela; revela o trecho final que ficou escondido.
+	VPOKE $3F07,$30
+	WAIT
+	' Restante: 224 pixels; terminamos antes de $2800 repetir.
+	FOR q = 0 TO 223
+		WAIT
+		IF CONT1.KEY = 11 THEN GOTO ec_fim
+		#bk = #bk + 1
+		SCROLL 0,#bk
+		WAIT
+		IF CONT1.KEY = 11 THEN GOTO ec_fim
+	NEXT q
 	RESTORE fade_tbl_out
 	FOR r = 0 TO 6
 		READ BYTE e
@@ -2701,6 +2737,9 @@ ec_release:
 	NEXT r
 ec_fim:
 	SCREEN DISABLE
+	POKE $1C,$00
+	#bk = 0
+	SCROLL 0,#bk
 	WAIT
 	END
 
@@ -2752,6 +2791,220 @@ te_release:
 	NEXT r
 te_fim:
 	SCREEN DISABLE
+	WAIT
+	END
+
+	' v0.30: cada linha usa uma linha vazia acima; os tiles 26/27/28
+	' (til/agudo/circunflexo) ficam exatamente sobre a vogal. O primeiro
+	' trecho vive em $2800; o restante e escrito em $2000, escondido pela
+	' paleta, e revelado quando o scroll chega a segunda pagina.
+history_text:
+	DATA BYTE 1,4,23,79,32,73,77,80,69,82,73,79,32,71,79,82,70,32,65,77,69,65,29,65,32,65
+	DATA BYTE 0,9,1,27
+	DATA BYTE 3,1,29,71,65,76,65,88,73,65,33,32,65,32,72,85,77,65,78,73,68,65,68,69,32,80,82,69,67,73,83,65
+	DATA BYTE 2,4,1,27
+	DATA BYTE 5,3,25,82,69,83,73,83,84,73,82,32,69,32,69,78,70,82,69,78,84,65,82,32,69,83,83,69
+	DATA BYTE 7,1,31,73,78,73,77,73,71,79,32,84,69,82,82,73,86,69,76,33,32,79,83,32,76,65,67,65,73,79,83,32,68,69
+	DATA BYTE 6,13,1,27
+	DATA BYTE 9,3,26,71,79,82,70,32,69,78,67,79,78,84,82,65,82,65,77,32,65,32,84,69,82,82,65,32,69
+	DATA BYTE 11,5,21,73,78,73,67,73,65,82,65,77,32,85,77,65,32,71,85,69,82,82,65,46
+	DATA BYTE 13,1,30,69,77,32,83,69,77,65,78,65,83,44,32,65,83,32,70,79,82,29,65,83,32,68,65,32,84,69,82,82,65
+	DATA BYTE 15,1,30,69,32,68,79,83,32,73,78,73,77,73,71,79,83,32,83,79,70,82,69,82,65,77,32,77,85,73,84,65,83
+	DATA BYTE 17,2,27,66,65,73,88,65,83,44,32,77,65,83,32,69,76,69,83,32,69,83,84,65,86,65,77,32,69,77
+	DATA BYTE 19,3,26,77,65,73,79,82,32,78,85,77,69,82,79,32,69,32,67,79,78,83,69,71,85,73,82,65,77
+	DATA BYTE 18,10,1,27
+	DATA BYTE 21,5,21,83,73,84,73,65,82,32,78,79,83,83,79,32,80,76,65,78,69,84,65,46
+	DATA BYTE 23,2,28,67,79,77,79,32,85,76,84,73,77,79,32,82,69,67,85,82,83,79,44,32,79,83,32,84,82,69,83
+	DATA BYTE 22,7,1,27
+	DATA BYTE 22,28,1,28
+	DATA BYTE 25,1,31,77,69,76,72,79,82,69,83,32,80,73,76,79,84,79,83,32,68,65,32,84,69,82,82,65,32,70,79,82,65,77
+	DATA BYTE 27,2,28,69,78,86,73,65,68,79,83,32,78,85,77,65,32,77,73,83,83,65,79,32,83,85,73,67,73,68,65
+	DATA BYTE 26,20,1,26
+	DATA BYTE 26,27,1,27
+	DATA BYTE 29,3,26,80,65,82,65,32,79,32,83,73,83,84,69,77,65,32,89,65,82,73,83,44,32,80,65,82,65
+	DATA BYTE 31,2,27,84,69,78,84,65,82,32,68,69,82,82,79,84,65,82,32,71,79,82,70,32,69,77,32,83,85,65
+	DATA BYTE 33,9,13,80,82,79,80,82,73,65,32,67,65,83,65,46
+	DATA BYTE 32,11,1,27
+	DATA BYTE 35,3,25,65,32,77,73,83,83,65,79,58,32,65,76,67,65,78,29,65,82,32,89,65,82,73,83,44
+	DATA BYTE 34,9,1,26
+	DATA BYTE 37,1,29,80,65,83,83,65,82,32,80,79,82,32,86,85,76,67,65,78,44,32,79,32,67,73,78,84,85,82,65,79
+	DATA BYTE 36,28,1,26
+	DATA BYTE 39,3,25,68,69,32,65,83,84,69,82,79,73,68,69,83,44,32,68,69,83,84,82,85,73,82,32,79
+	DATA BYTE 38,11,1,27
+	DATA BYTE 41,1,30,71,69,82,65,68,79,82,32,68,69,32,69,83,67,85,68,79,83,32,69,77,32,65,84,76,65,78,84,73,83
+	DATA BYTE 43,4,24,80,65,82,65,32,67,72,69,71,65,82,32,65,32,71,79,82,70,70,73,79,78,32,69
+	DATA BYTE 45,3,26,68,69,83,84,82,85,73,82,32,71,79,82,70,32,69,77,32,83,85,65,32,66,65,83,69,33
+	DATA BYTE 47,1,29,66,79,65,32,83,79,82,84,69,44,32,86,79,67,69,83,32,83,65,79,32,65,32,85,76,84,73,77,65
+	DATA BYTE 46,15,1,28
+	DATA BYTE 46,19,1,26
+	DATA BYTE 46,24,1,27
+	DATA BYTE 49,6,19,69,83,80,69,82,65,78,29,65,32,68,65,32,84,69,82,82,65,33
+
+credits_text:
+	DATA BYTE 1,6,20,81,85,69,77,32,70,69,90,32,83,80,65,67,69,32,66,76,65,83,84
+	DATA BYTE 3,2,27,80,82,79,71,82,65,77,65,29,65,79,58,32,83,65,85,76,79,32,83,65,78,84,73,65,71,79
+	DATA BYTE 2,11,1,26
+	DATA BYTE 5,4,24,71,82,65,70,73,67,79,83,58,32,83,65,85,76,79,32,83,65,78,84,73,65,71,79
+	DATA BYTE 4,6,1,27
+	DATA BYTE 7,5,21,65,85,68,73,79,58,32,83,65,85,76,79,32,83,65,78,84,73,65,71,79
+	DATA BYTE 9,6,19,80,82,79,68,85,29,65,79,58,32,76,77,83,32,82,69,84,82,79
+	DATA BYTE 8,12,1,26
+	DATA BYTE 11,4,23,80,85,66,76,73,67,65,29,65,79,58,32,70,65,76,67,79,78,32,83,79,70,84
+	DATA BYTE 10,12,1,26
+	DATA BYTE 13,2,27,84,69,83,84,69,83,58,32,77,65,82,67,79,83,32,70,69,76,73,80,69,44,32,76,85,67,65
+	DATA BYTE 15,1,29,86,79,76,79,84,65,79,44,32,76,85,67,65,83,32,77,85,78,72,79,90,44,32,70,73,76,73,80,69
+	DATA BYTE 14,6,1,26
+	DATA BYTE 17,11,9,71,82,65,67,73,79,76,76,73
+	DATA BYTE 19,3,25,65,71,82,65,68,69,67,73,77,69,78,84,79,83,32,69,83,80,69,67,73,65,73,83,58
+	DATA BYTE 21,5,21,87,65,82,80,90,79,78,69,44,32,67,65,78,65,76,51,44,32,82,73,79
+	DATA BYTE 23,5,21,82,69,84,82,79,71,65,77,69,83,44,32,83,72,77,85,80,83,66,82,44
+	DATA BYTE 25,2,27,77,65,82,67,79,83,32,70,69,76,73,80,69,44,32,82,65,70,65,69,76,32,76,73,77,65,44
+	DATA BYTE 27,4,23,80,86,32,82,65,68,84,75,69,44,32,89,85,82,73,32,68,65,86,73,76,65,44
+	DATA BYTE 26,21,1,27
+	DATA BYTE 29,1,29,84,72,73,65,71,79,32,77,73,78,69,73,82,79,44,32,76,85,67,65,83,32,77,85,78,72,79,90,44
+	DATA BYTE 31,6,20,71,85,83,84,65,86,79,32,86,65,76,68,73,86,73,69,83,83,79,44
+	DATA BYTE 33,5,22,77,65,82,73,79,32,78,69,83,82,79,67,75,83,44,32,67,65,82,73,78,65
+	DATA BYTE 35,5,21,86,79,76,79,84,65,79,44,32,76,85,67,65,32,69,32,82,65,86,73,44
+	DATA BYTE 34,10,1,26
+	DATA BYTE 37,3,26,84,79,68,79,83,32,79,83,32,65,77,73,71,79,83,32,81,85,69,32,83,69,77,80,82,69
+	DATA BYTE 39,2,28,65,67,82,69,68,73,84,65,82,65,77,32,78,65,32,70,65,76,67,79,78,32,83,79,70,84,32,69
+	DATA BYTE 41,3,26,86,79,67,69,44,32,81,85,69,32,80,82,69,83,84,73,71,73,79,85,32,78,79,83,83,79
+	DATA BYTE 40,6,1,28
+	DATA BYTE 43,12,8,84,82,65,66,65,76,72,79
+	DATA BYTE 45,3,26,86,73,83,73,84,69,32,65,32,70,65,76,67,79,78,83,79,70,84,46,67,79,77,46,66,82
+	DATA BYTE 47,8,16,80,65,82,65,32,78,79,86,79,83,32,74,79,71,79,83
+	DATA BYTE 49,2,28,65,80,79,73,69,77,32,83,69,77,80,82,69,32,79,83,32,73,78,68,73,69,32,71,65,77,69,83
+	DATA BYTE 51,10,12,66,82,65,83,73,76,69,73,82,79,83,33
+
+	' v0.30: a PRINT do CVBasic so endereca $2000-$27FF; para a segunda
+	' nametable o texto entra por VPOKE em $2800. A tela fica desligada
+	' durante a montagem e cada linha termina com WAIT para drenar a fila.
+scroll_clear_nt2: PROCEDURE
+	' Segunda nametable + atributos; a primeira e limpa pela CLS.
+	#tw = $2800
+	FOR r = 0 TO 29
+		FOR q = 0 TO 31
+			VPOKE #tw,32
+			#tw = #tw + 1
+		NEXT q
+		WAIT
+	NEXT r
+	#tw = $2BC0
+	FOR q = 0 TO 63
+		VPOKE #tw,0
+		IF (q AND 15) = 15 THEN WAIT
+	NEXT q
+	END
+
+scroll_set_tail_attrs: PROCEDURE
+	' O texto que fica em $2000 inicia invisivel (pal1/preto) e acende
+	' junto com o segundo trecho, depois que $2000 nao esta mais na tela.
+	#tw = $23C0
+	FOR q = 0 TO 63
+		VPOKE #tw,$55
+		IF (q AND 15) = 15 THEN WAIT
+	NEXT q
+	END
+
+scroll_draw_history: PROCEDURE
+	RESTORE history_text
+	FOR c = 0 TO 39
+		READ BYTE r
+		READ BYTE e2
+		READ BYTE sk
+		IF r < 30 THEN
+			#tw = $2800 + r * 32 + e2
+		ELSE
+			r = r - 30
+			#tw = $2000 + r * 32 + e2
+		END IF
+		FOR q = 0 TO sk - 1
+			READ BYTE e
+			VPOKE #tw,e
+			#tw = #tw + 1
+		NEXT q
+		WAIT
+	NEXT c
+	END
+
+scroll_draw_credits: PROCEDURE
+	RESTORE credits_text
+	FOR c = 0 TO 33
+		READ BYTE r
+		READ BYTE e2
+		READ BYTE sk
+		IF r < 30 THEN
+			#tw = $2800 + r * 32 + e2
+		ELSE
+			r = r - 30
+			#tw = $2000 + r * 32 + e2
+		END IF
+		FOR q = 0 TO sk - 1
+			READ BYTE e
+			VPOKE #tw,e
+			#tw = #tw + 1
+		NEXT q
+		WAIT
+	NEXT c
+	END
+
+history_screen: PROCEDURE
+	SCREEN DISABLE
+	FOR c = 0 TO 63
+		SPRITE c,$f0,0,0,0
+	NEXT c
+	POKE $1C,$00		' fonte Saulo; os acentos sao tiles na linha vazia acima
+	PALETTE LOAD game_palette_title
+	CLS
+	GOSUB scroll_clear_nt2
+	GOSUB scroll_draw_history
+	GOSUB scroll_set_tail_attrs
+	#bk = 0
+	SCROLL 0,#bk
+	VPOKE $3F01,$0F
+	VPOKE $3F02,$0F
+	VPOKE $3F03,$0F
+	VPOKE $3F07,$0F
+	WAIT
+	SCREEN ENABLE
+	RESTORE fade_tbl
+	FOR r = 0 TO 6
+		READ BYTE e
+		READ BYTE e
+		VPOKE $3F03,e
+		FOR q = 0 TO 3
+			WAIT
+			IF CONT1.KEY = 11 THEN GOTO hs_fim
+		NEXT q
+	NEXT r
+	' Primeiro trecho: 256 pixels ate $2800 ocupar a tela inteira.
+	FOR r = 0 TO 1
+		FOR q = 0 TO 127
+			WAIT
+			IF CONT1.KEY = 11 THEN GOTO hs_fim
+			#bk = #bk + 1
+			SCROLL 0,#bk
+			WAIT
+			IF CONT1.KEY = 11 THEN GOTO hs_fim
+		NEXT q
+	NEXT r
+	' $2000 ja esta fora da tela; revela o trecho final que ficou escondido.
+	VPOKE $3F07,$30
+	WAIT
+	' Restante: 224 pixels; terminamos antes de $2800 repetir.
+	FOR q = 0 TO 223
+		WAIT
+		IF CONT1.KEY = 11 THEN GOTO hs_fim
+		#bk = #bk + 1
+		SCROLL 0,#bk
+		WAIT
+		IF CONT1.KEY = 11 THEN GOTO hs_fim
+	NEXT q
+hs_fim:
+	SCREEN DISABLE
+	POKE $1C,$00
+	#bk = 0
+	SCROLL 0,#bk
 	WAIT
 	END
 
@@ -3964,7 +4217,18 @@ anim_idle:	PROCEDURE	' soltou o direcional: desvira (6,5,4) e faz idle
 	' v0.28: acentos da spritefont do Saulo (tecnica dele: glifo na
 	' "linha logo acima da letra acentuada") em 3 tiles livres da
 	' pagina 0. 26 = TIL (cell 13), 27 = AGUDO (cell 11),
-	' 28 = CIRCUNFLEXO (cell 12). Uso: VPOKE no slot (linha-1, col).
+	' 28 = CIRCUNFLEXO e 29 = Ç. Uso: VPOKE no slot (linha-1, col); Ç tem glifo proprio.
+	' v0.30: padrao dedicado de Ç; tile 96 e a arte do logo, portanto nao e reutilizado.
+	CHRROM PATTERN 29
+	BITMAP "..3333.."
+	BITMAP ".33..33."
+	BITMAP "33......"
+	BITMAP "33......"
+	BITMAP ".33..33."
+	BITMAP "..3333.."
+	BITMAP "...33..."
+	BITMAP "....3..."
+
 	CHRROM PATTERN 26
 	BITMAP "........"
 	BITMAP "........"
@@ -3980,8 +4244,8 @@ anim_idle:	PROCEDURE	' soltou o direcional: desvira (6,5,4) e faz idle
 	BITMAP "........"
 	BITMAP "........"
 	BITMAP "........"
-	BITMAP "..3....."
 	BITMAP "...3...."
+	BITMAP "..3....."
 	BITMAP "........"
 	CHRROM PATTERN 28
 	BITMAP "........"
@@ -12984,5 +13248,4 @@ mus_title:
 	BITMAP "00000000"
 	BITMAP "00000000"
 	BITMAP "00000000"
-
 

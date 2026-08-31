@@ -16,7 +16,14 @@
 #       continuam intactos. A FONTE ($0000 32-95) NUNCA MAIS e tocada
 #       (bug v0.12: PRINT = ASCII direto p/ tile - fonte virou arte!).
 # Emite /tmp/chr_bossbg.bas /tmp/boss_procs.bas /tmp/boss_ingame.png
+from pathlib import Path
+import os
 from PIL import Image
+
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+OUTDIR = Path(os.environ.get('SPACEBLAST_GENERATED', '/tmp'))
+OUTDIR.mkdir(parents=True, exist_ok=True)
 
 C3 = {(68, 40, 188): '1', (152, 120, 248): '2', (248, 216, 120): '3'}
 CL = {(0, 120, 248): '1', (164, 228, 252): '2', (252, 252, 252): '3',
@@ -32,7 +39,7 @@ def load(p, cmap):
         return cmap.get((r, g, b), '2')
     return im.width, im.height, q
 
-_, _, bq = load('/home/user/uploads/boss.png', C3)
+_, _, bq = load(UPLOADS / 'boss.png', C3)
 
 def cell8(q, tx, ty):
     return tuple(''.join(q(tx * 8 + x, ty * 8 + y) for x in range(8))
@@ -72,7 +79,7 @@ for f in sorted(by_fis):
     for rowt in by_fis[f]:
         out_bg.append('\tBITMAP "' + ''.join(rowt) + '"\n')
     run = f + 1
-open('/tmp/chr_bossbg.bas', 'w').writelines(out_bg)
+(OUTDIR / 'chr_bossbg.bas').write_text(''.join(out_bg))
 
 # ============ codigo: sky_clear / boss_write / boss_erase ============
 code = ["\t' === gerado por gera_boss.py (v0.13): ceu preto + boss BG $1000 ===\n"]
@@ -124,11 +131,11 @@ for ar in range(3):
     for ac in range(2, 6):
         code.append("\tVPOKE $%04X,0\n" % (0x23C0 + ar * 8 + ac))
 code.append("\tWAIT\n\tEND\n")
-open('/tmp/boss_procs.bas', 'w').writelines(code)
+(OUTDIR / 'boss_procs.bas').write_text(''.join(code))
 
 # ---- laser (Saulo, 16x32, pal3 ciano; bytes OAM 173/175/177/179) ----
-_, _, lq = load('/home/user/uploads/laser.png', CL)
-_, _, tq = load('/home/user/uploads/tiro player.png', CL)
+_, _, lq = load(UPLOADS / 'laser.png', CL)
+_, _, tq = load(UPLOADS / 'tiro player.png', CL)
 out_extra = ["\t' Laser do Saulo (16x32, pal3 ciano; gera_boss.py)\n"]
 for k, (col, half) in enumerate([(0, 0), (0, 1), (1, 0), (1, 1)]):
     f = 428 + k * 2
@@ -136,7 +143,7 @@ for k, (col, half) in enumerate([(0, 0), (0, 1), (1, 0), (1, 1)]):
     for y in range(16):
         out_extra.append('\tBITMAP "' + ''.join(lq(col*8+x, half*16+y)
                          for x in range(8)) + '"\n')
-open('/tmp/chr_extra.bas', 'w').writelines(out_extra)
+(OUTDIR / 'chr_extra.bas').write_text(''.join(out_extra))
 
 # ---- tiro novo do player (2 frames; bytes OAM 217/219) ----
 out_t = []
@@ -147,7 +154,7 @@ for fno, base in ((0, 472), (1, 474)):
                      for x in range(8)) + '"\n')
     for y in range(8):
         out_t.append('\tBITMAP "........"\n')
-open('/tmp/tiro_tiles.bas', 'w').writelines(out_t)
+(OUTDIR / 'tiro_tiles.bas').write_text(''.join(out_t))
 
 # ---- preview reconstruido (frame 0) ----
 CHB = {'.': (8, 8, 16), '1': (68, 40, 188), '2': (152, 120, 248), '3': (248, 216, 120)}
@@ -157,6 +164,6 @@ for ty in range(8):
         for y in range(8):
             for x in range(8):
                 im.putpixel((tx*8+x, ty*8+y), CHB[bq(tx*8+x, ty*8+y)])
-im.resize((384, 256), Image.NEAREST).save('/tmp/boss_ingame.png')
+im.resize((384, 256), Image.NEAREST).save(OUTDIR / 'boss_ingame.png')
 print('OK: boss 96x64 frame0 ->', len(uniq), 'tiles em $1000;',
       'attrs linhas 0-2 cols 2-5')

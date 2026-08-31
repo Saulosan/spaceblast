@@ -31,11 +31,15 @@ O que faz em space-blast.bas (idempotente, roda quantas vezes quiser):
 Pixels: folha e' 1-bit; emitimos pixel '3' (dois planos iguais), identico
 a' fonte default do CVBasic -> comportamento de paleta INALTERADO.
 """
-import re, sys
+import os
+import re
+from pathlib import Path
 from PIL import Image
 
-SHEET = '/home/user/uploads/Sprite_font.png'
-BAS   = '/home/user/spaceblast/space-blast.bas'
+HERE = Path(__file__).resolve().parent
+UPLOADS = Path(os.environ.get('SPACEBLAST_UPLOADS', HERE.parent / 'uploads'))
+SHEET = UPLOADS / 'Sprite_font.png'
+BAS   = HERE / 'space-blast.bas'
 MARK_I = "\t' ===== FONTE SAULO v0.17 — INICIO (gera_fonte.py) ====="
 MARK_F = "\t' ===== FONTE SAULO v0.17 — FIM ====="
 

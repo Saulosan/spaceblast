@@ -4,11 +4,13 @@ Port para **NES/Famicom** do jogo HTML5 **Space Blast** (antes "Caravan
 Blast"; Saulo San — http://saulosan.com.br/caravanblast), escrito em
 **CVBasic** v0.9.2 rodando em **UNROM 512 (mapper 30, 512 KB)**.
 
-**ESTADO ATUAL: v0.28** (seção da v0.28 logo abaixo; histórico completo em HISTORICO.md)
+**ESTADO ATUAL: v0.28 baseline** (seção da v0.28 logo abaixo; histórico completo em HISTORICO.md)
 
 ## v0.28 — As 5 fases + fim de jogo (ordem do Saulo)
 
-ROM `8ac873400a4d8c15b4ad4dd2c5fea1d3`. Todas as fases no mesmo esquema
+ROM baseline `b22ac571b09857c03b04016c692f6502` (MD5),
+`c464d8db98fb2ec4e3f6b8270ebb98458e86095bba92ee9252dc9972d2cfaee5`
+(SHA-256), 524.304 bytes. Todas as fases no mesmo esquema
 aprovado (scroll estilo fase 1, mesmos inimigos da fase 1, miniboss +
 mesmo boss em todas):
 
@@ -38,9 +40,19 @@ foi para o banco 1 (mesmo padrão validado do `mb_frame/boss_frame`),
 `stars_fill` ficou no banco 0, e o refill do mar no `boss_kill` foi
 removido (desnecessário: o boss é o fim da fase).
 
-Suite emu 13/13: título, ciclo SELECT 1-5 com `$1C` certo, scroll água,
-boss fase 1 → fase 2, boss fase 2 (lava) → card 03 com acentos → fase 3,
-ending (3 telas) → volta à fase 1 com 3 vidas.
+A baseline foi recompilada e validada pela suíte independente
+`nes-test/test_v028_baseline.py`: boot, ciclo SELECT
+`1 → 2 → 3 → 4 → 5 → 1`, bancos CHR/paletas dos cinco cenários,
+boss da fase 5 (HP 120 e dano), quatro telas do ending e retorno a uma
+partida nova na fase 1. O teste também impede regressões do limite de
+`FOR` de 8 bits do CVBasic nas telas longas do ending. Os testes legados
+`v08_ajustes.py`, `v13_boss2_v019.py` e `teste_v04_full.py` continuam
+sendo referências de regressão.
+
+Durante a consolidação, os três holds acima de 254 frames foram divididos
+em laços seguros: vitória/THE END = 2 × 135 (270f), créditos = 2 × 225
+(450f). A lógica de gameplay fora dessa correção de infraestrutura não foi
+alterada.
 
 ## v0.27 — Ilhas pequenas na lava, scroll continua perfeito
 
@@ -999,25 +1011,42 @@ quantizados na paleta 2C02 respeitando 3 cores+transparência por sprite e as
 Horizontal ≈ ×0.53, vertical ≈ ×0.375; velocidades convertidas px/s →
 1/16 px/frame. Frames de animação preservados 1:1 por hardware H-FLIP.
 
-## Compilar e rodar
+## Compilar, validar e rodar
+
+O procedimento não depende do GitHub Desktop nem do diretório atual:
 
 ```sh
-./build.sh        # precisa de ../cvbasic-repo e ../gasm80-repo (ver cata-estrelas)
+cd spaceblast
+sh build.sh
+python3 gen_addrs.py
 ```
 
-Gera `caravan-blast.nes` (iNES, mapper 0/NROM). Abra em Mesen 2/FCEUX/Nestopia.
+`build.sh` localiza os binários `cvbasic` e `gasm80` relativos ao próprio
+script (`../cvbasic-repo/`), faz cópias temporárias executáveis e grava
+`space-blast.asm`/`space-blast.nes` sem alterar permissões dos binários
+versionados. Para usar outra instalação, defina `CVBASIC_BIN` e
+`GASM80_BIN`. O resultado é iNES, mapper 30, 512 KiB de PRG e CHR-RAM.
 
-- **Direcional**: move · **B (segurar)**: rajada · **Start**: inicia/reinicia
+Suíte independente da baseline v0.28 (o core é localizado por
+`FCEUMM_CORE`, ou use `/tmp/fceumm_libretro.so`):
 
-Testes automatizados no fceumm (libretro): `../nes-test/teste_cb.py`.
+```sh
+python3 nes-test/test_v028_baseline.py
+# ou: FCEUMM_CORE=/caminho/fceumm_libretro.so python3 nes-test/test_v028_baseline.py
+```
 
-## Fora de escopo nesta versão (próximos passos)
+A suíte imprime MD5/SHA-256 e testa boot, cinco fases, SELECT,
+CHRRAM/paletas, boss, ending e retorno à fase 1. Abra a ROM em Mesen 2,
+FCEUX ou Nestopia. No jogo: **direcional** move, **B (segurar)** dispara,
+**Start** inicia/reinicia; **Select** é o ciclo de diagnóstico das fases.
 
-- medA (Enemy4, sine), medB (miniboss Enemy2), medC (Enemy3, lemniscate)
-- Combo, medalhas, cápsulas/power-ups (verde/roxo), laser, mísseis
-- Boss (Boss1.gif) e o cronômetro da caravana (5:00)
-- Título com logo real (title.png) + Saturno, intro, parallax do fundo
-- Música (BGM stage1) — os canais estão quase livres
+
+## Escopo congelado após a baseline
+
+A v0.28 preserva as mecânicas e os assets já validados. Não adicionar
+inimigos próprios, novas funções ou melhorias visuais antes do teste
+externo do usuário no Mesen e no hardware real. A próxima rodada, se
+aprovada, poderá tratar esses recursos sem misturá-los à baseline.
 
 ## v0.5 (jul/2026) - Trilhas sonoras
 

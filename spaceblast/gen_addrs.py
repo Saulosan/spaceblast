@@ -1,26 +1,41 @@
 #!/usr/bin/env python3
-# Regenera /home/user/nes-test/addrs_cb.py a partir de space-blast.asm
-# (rodar DEPOIS de cada build). Mapa: CVB_X -> X, CVB_ARRAY_ARR -> #ARR.
-import re, sys
+"""Regenerate the RAM-address map used by the emulator harnesses.
 
-ASM = '/home/user/spaceblast/space-blast.asm'
-OUT = '/home/user/nes-test/addrs_cb.py'
+Paths default to this repository's generated assembly and nes-test output,
+but both can be overridden for a diagnostic build::
+
+    python3 gen_addrs.py [asm] [output]
+"""
+from pathlib import Path
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent
+ASM = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else HERE / 'space-blast.asm'
+OUT = (Path(sys.argv[2]).resolve() if len(sys.argv) > 2
+       else HERE.parent / 'nes-test' / 'addrs_cb.py')
 
 addr = {}
-for m in re.finditer(r'^(cvb_[\w#]+|array_[\w#]+):\s*equ \$(\w+)', open(ASM).read(), re.M | re.I):
-    lbl, val = m.group(1), int(m.group(2), 16)
-    u = lbl.upper()
-    if u.startswith('CVB_'):
-        name = u[4:]
-    elif u.startswith('ARRAY_'):
-        name = u[6:]   # 16-bit ja' vem com '#' no rotulo (array_#SHY)
+for match in re.finditer(
+        r'^(cvb_[\w#]+|array_[\w#]+):\s*equ \$(\w+)',
+        ASM.read_text(), re.MULTILINE | re.IGNORECASE):
+    label, value = match.group(1), int(match.group(2), 16)
+    upper = label.upper()
+    if upper.startswith('CVB_'):
+        name = upper[4:]
+    elif upper.startswith('ARRAY_'):
+        # 16-bit names already carry the '#' in the assembly label.
+        name = upper[6:]
     else:
-        name = u
-    addr[name] = val
+        name = upper
+    addr[name] = value
 addr['FRAME'] = 0x12
-with open(OUT, 'w') as f:
-    f.write('# gerado automaticamente (regenerar apos cada build)\nADDR = {\n')
-    for k in sorted(addr):
-        f.write(f'    "{k}": 0x{addr[k]:04X},\n')
-    f.write('}\nA = ADDR\n')
+
+OUT.parent.mkdir(parents=True, exist_ok=True)
+with OUT.open('w') as file:
+    file.write('# gerado automaticamente (regenerar apos cada build)\n')
+    file.write('ADDR = {\n')
+    for name in sorted(addr):
+        file.write(f'    "{name}": 0x{addr[name]:04X},\n')
+    file.write('}\nA = ADDR\n')
 print(f'{len(addr)} simbolos -> {OUT}')
