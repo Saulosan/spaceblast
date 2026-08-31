@@ -1,0 +1,5 @@
+Space-Blast v0.28 baseline
+File: Space-Blast-v0.28-baseline.nes
+Size: 524304 bytes
+MD5: b22ac571b09857c03b04016c692f6502
+SHA-256: c464d8db98fb2ec4e3f6b8270ebb98458e86095bba92ee9252dc9972d2cfaee5
